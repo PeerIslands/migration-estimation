@@ -1,0 +1,287 @@
+.container {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--background, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(15, 15, 15, 0.08);
+  color: #000000;
+  /* font-family: Calibri; */
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 24px;
+  color: #000000;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+}
+
+.description {
+  margin: 0;
+  color: #555;
+}
+
+.progress {
+  margin: 16px 0 24px 0;
+  position: relative;
+}
+
+.progressTrack {
+  height: 18px;
+  background: #e5e7eb;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 18px;
+  background: linear-gradient(90deg, #6366f1, #22d3ee);
+  border-radius: 2px;
+  transition: width 200ms ease;
+}
+
+.progressText {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.section {
+  margin: 16px 0 24px 0;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.sectionDescription {
+  margin: 0 0 40px 0;
+  color: #666;
+}
+
+.questionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tabbed per-environment section */
+.tabList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: 10px 16px;
+  font-weight: 500;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  border-radius: 6px 6px 0 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.tab:hover {
+  color: #374151;
+  background: #f3f4f6;
+}
+
+.tabActive {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.tabPanel {
+  margin-top: 0;
+}
+
+.tabbedSectionError {
+  margin: 0 0 12px 0;
+  padding: 10px 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 4px;
+}
+
+.helpText {
+  color: #666;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.control {
+  display: block;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  /* box-shadow: 0 0 0 3px rgba(99,102,241,0.15); */
+}
+
+.textarea {
+  resize: vertical;
+}
+
+.optionGroup {
+  display: flex;
+  gap: 12px;
+}
+
+.vertical {
+  flex-direction: column;
+}
+
+.horizontal {
+  flex-direction: row;
+}
+
+.optionItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ratingItem {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.ratingSelected {
+  background: #6366f1;
+  border-color: #6366f1;
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider {
+  appearance: none;
+  height: 10px;
+  padding: 0;
+  background: #e5e7eb;
+  border: none;
+  border-radius: 999px;
+}
+
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #6366f1;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #6366f1;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.sliderValue {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.errorText {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.navRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.primaryButton {
+  background: #6366f1;
+  font-weight: 600;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  background: #ffffff;
+  font-weight: 600;
+  color: #111827;
+  border: 1px solid #9a9da3;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.thankYou {
+  padding: 24px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 8px;
+}
+
+.saveHint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+
