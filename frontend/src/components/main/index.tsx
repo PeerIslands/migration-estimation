@@ -47,7 +47,7 @@ export default function FormRenderer({ config }: FormRendererProps) {
   const [errorsByQuestionId, setErrorsByQuestionId] = useState<Record<string, string>>({});
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
-  const numEnvironments = Number(answers.num_environments) || 0;
+  const numEnvironments = Number(answers.number_of_environments) || 0;
 
   // Build effective sections: setup first, then common + per-env questions based on num_environments
   const sections: Section[] = useMemo(() => {
@@ -158,6 +158,19 @@ export default function FormRenderer({ config }: FormRendererProps) {
       }
       return;
     }
+    
+    // Special case: on setup section, after entering numEnvironments, 
+    // sections will rebuild on next render with more sections
+    if (current.sectionId === "setup" && sections.length === 1) {
+      // Check if numEnvironments is now set (validation passed)
+      const enteredNum = Number(answers.number_of_environments) || 0;
+      if (enteredNum >= 1) {
+        // Move to section 1 - on re-render, sections will have more items
+        setSectionIndex(1);
+        return;
+      }
+    }
+    
     if (sectionIndex < sections.length - 1) {
       setSectionIndex(sectionIndex + 1);
     }
@@ -500,7 +513,8 @@ export default function FormRenderer({ config }: FormRendererProps) {
         <button type="button" className={styles.secondaryButton} onClick={goBack} disabled={sectionIndex === 0}>
           Back
         </button>
-        {sectionIndex < sections.length - 1 ? (
+        {/* Show "Next" if: more sections exist, OR we're on setup and numEnvironments will trigger more sections */}
+        {sectionIndex < sections.length - 1 || (currentSection?.sectionId === "setup" && sections.length === 1) ? (
           <button type="button" className={styles.primaryButton} onClick={goNext}>
             Next
           </button>

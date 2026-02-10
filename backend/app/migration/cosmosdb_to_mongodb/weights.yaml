@@ -1,0 +1,35 @@
+version: "1.0"
+
+# Conversion factors
+conversions:
+  hours_per_day: 8
+
+# Collection calculation parameters
+collection_config:
+  # Base number of collections included in the matrix base_days
+  base_collections: 50
+  # Increment step for additional collections
+  increment_step: 50
+  # Calculation method: ceiling means round up to next step
+  # Formula: ceiling((collections - base_collections) / increment_step) * increment_per_50_collections
+  calculation_method: "ceiling"
+
+# Data size tier matching configuration
+data_size_config:
+  # Method to match input data size to tier
+  # "round_up" means use the tier whose upper bound >= input data size
+  rounding_method: "round_up"
+  # Unit for input data size
+  input_unit: "GB"
+
+# Estimation variance
+# Actual timelines may vary by this percentage based on data structure,
+# system performance and operational conditions during migration
+estimation_variance_percent: 20
+
+# RU utilization assumptions
+ru_config:
+  # Migration throughput assumes this percentage of effective RU utilization
+  effective_utilization_percent: 50
+  # Remaining capacity reserved for application workload
+  reserved_for_application_percent: 50

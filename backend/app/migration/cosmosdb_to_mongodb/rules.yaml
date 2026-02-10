@@ -1,0 +1,166 @@
+version: "1.0"
+migration_type: "cosmosdb_to_mongodb"
+
+# Base configuration - the matrix is based on these values
+base_config:
+  databases: 10
+  collections: 50
+
+# Estimation matrix - nested by data_size > hard_delete > reverse_sync
+# Range boundaries use "round up to next tier" logic
+estimation_matrix:
+  - tier: "50GB"
+    range_gb: [0, 50]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 2
+            increment_per_50_collections: 1
+          true:
+            base_days: 3
+            increment_per_50_collections: 1.5
+      true:
+        reverse_sync:
+          false:
+            base_days: 3
+            increment_per_50_collections: 1.5
+          true:
+            base_days: 4
+            increment_per_50_collections: 2
+
+  - tier: "100GB"
+    range_gb: [51, 100]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 4
+            increment_per_50_collections: 1.5
+          true:
+            base_days: 5
+            increment_per_50_collections: 2
+      true:
+        reverse_sync:
+          false:
+            base_days: 5
+            increment_per_50_collections: 2
+          true:
+            base_days: 6
+            increment_per_50_collections: 2.5
+
+  - tier: "250GB"
+    range_gb: [101, 250]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 6
+            increment_per_50_collections: 2
+          true:
+            base_days: 7
+            increment_per_50_collections: 2.5
+      true:
+        reverse_sync:
+          false:
+            base_days: 7
+            increment_per_50_collections: 2.5
+          true:
+            base_days: 9
+            increment_per_50_collections: 3
+
+  - tier: "500GB"
+    range_gb: [251, 500]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 9
+            increment_per_50_collections: 2
+          true:
+            base_days: 11
+            increment_per_50_collections: 3
+      true:
+        reverse_sync:
+          false:
+            base_days: 11
+            increment_per_50_collections: 3
+          true:
+            base_days: 13
+            increment_per_50_collections: 4
+
+  - tier: "1TB"
+    range_gb: [501, 1024]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 15
+            increment_per_50_collections: 3
+          true:
+            base_days: 17
+            increment_per_50_collections: 3.5
+      true:
+        reverse_sync:
+          false:
+            base_days: 17
+            increment_per_50_collections: 3.5
+          true:
+            base_days: 20
+            increment_per_50_collections: 4
+
+  - tier: "10TB"
+    range_gb: [1025, 10240]
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 26
+            increment_per_50_collections: 5
+          true:
+            base_days: 30
+            increment_per_50_collections: 6
+      true:
+        reverse_sync:
+          false:
+            base_days: 30
+            increment_per_50_collections: 6
+          true:
+            base_days: 35
+            increment_per_50_collections: 8
+
+  - tier: "25TB"
+    range_gb: [10241, null]  # null means no upper limit
+    hard_delete:
+      false:
+        reverse_sync:
+          false:
+            base_days: 35
+            increment_per_50_collections: 7
+          true:
+            base_days: 40
+            increment_per_50_collections: 8
+      true:
+        reverse_sync:
+          false:
+            base_days: 40
+            increment_per_50_collections: 8
+          true:
+            base_days: 45
+            increment_per_50_collections: 10
+
+# Reference examples for validation
+reference_estimates:
+  - name: "Air India"
+    data_size: "21TB"
+    collections: 3
+    scope: "CDC, no hard delete, no reverse sync"
+    effort_days: 35
+    notes: "One 17TB collection (replica set)"
+
+  - name: "Tata Digital"
+    data_size: "800GB"
+    collections: 37
+    scope: "CDC, hard delete, reverse sync"
+    effort_days: 16
+    notes: "25 with CDC, 12 without"

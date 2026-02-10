@@ -1,0 +1,117 @@
+version: "1.0"
+
+# Section 9 Assumptions from the migration estimation document
+assumptions:
+  - id: "setup_scope"
+    description: "Initial 3-day setup is per customer, not per cluster"
+
+  - id: "vm_prereq"
+    description: "VM access, storage and tool installation handled before migration start"
+
+  - id: "ce_support"
+    category: "support"
+    description: "Full-time CE support required during index creation for large datasets or if indexes are more than 64"
+
+  - id: "app_cutover"
+    description: "Application cutover (connection string updates on applications/APIs/microservices) handled by client"
+
+  - id: "migration_scope"
+    description: "Estimates is only for as-is migration (excludes app refactoring, defect fixes, schema changes and non-migration testing)"
+
+  - id: "reverse_sync_oplog"
+    category: "reverse_sync"
+    description: "If reverse sync is required, oplog window must be sized accordingly"
+    details:
+      - "Weekday reverse sync: oplog window of 24 hours (1 day)"
+      - "Weekend reverse sync: oplog window of 3-4 days"
+
+  - id: "cosmos_ts_limitation"
+    category: "cosmos_limitation"
+    description: "Cosmos MongoDB provides a hidden _ts field with TTL index, not available in MongoDB Atlas"
+    action: "If TTL functionality depends on _ts, an alternate timestamp field must be identified and used for TTL index creation in Atlas"
+
+  - id: "cluster_sizing"
+    category: "infrastructure"
+    description: "For dry runs and migration until cutover, provision destination cluster two tiers higher than planned production size"
+    example: "If target cluster is M40, use M60 during migration (M40 -> M50 -> M60 tier progression)"
+    post_migration: "After successful migration and cutover, the cluster can be scaled back to its intended size"
+
+  - id: "ru_considerations"
+    category: "cosmos_db"
+    description: "During dry runs and migration, Request Units (RUs) on Cosmos DB may need to be temporarily increased"
+    validation: "This requirement will be validated during dry runs"
+    recommendation: "Use dedicated RUs per collection (not shared RUs) during migration phases to avoid performance bottlenecks"
+
+# Activity efforts (added to base estimation)
+# These are per environment or per collection as specified
+activities:
+  base_setup:
+    description: "One-time per customer: VM verification, cluster provisioning, tool installation, validation"
+    effort_days: 3
+    per: "customer"
+    details:
+      - "1-2 Linux VMs depending on total data size, collections and migration mode"
+      - "Recommended VM Size: D32 - 32 vCPUs, 128 GB RAM"
+      - "OS: Ubuntu / RHEL compatible"
+      - "Node.js with MongoDB Node.js Driver installed"
+      - "mongosh connectivity to source (Cosmos DB) and target (MongoDB Atlas)"
+      - "Delete permissions on target cluster for dry run cleanup"
+
+  environment_validation:
+    description: "Per environment/cluster access validation"
+    effort_hours: 2
+    per: "environment"
+
+  discovery:
+    description: "Analyze source database and collections including schema review, collection sizing, and partition key assessment"
+    base_analysis_hours: 8
+    base_analysis_covers_tb: 3
+    per_additional_tb_hours: 1
+    large_collection_analysis_hours: 4
+    large_collection_threshold_tb: 3
+    large_collection_note: "Required for collections >3TB without partition key to assess migration strategy and performance risks"
+    per: "collection"
+
+  index_preparation:
+    description: "Prepare index creation scripts with CE validation"
+    min_hours: 8
+    min_collections: 100
+    max_hours: 16
+    max_collections: 500
+    per: "100-500 collections"
+
+  reverse_sync:
+    description: "Reverse sync setup and configuration"
+    simulation_test_hours: 4
+    simulation_per: "environment"
+    config_creation_hours: 1
+    config_per_collections: 50
+    config_note: "One config typically covers ~5 collections"
+    cutover_minutes: 2
+    cutover_per_collections: 5
+
+  hard_delete:
+    description: "Hard delete testing and configuration"
+    test_hours: 8
+    test_per_collections: 10
+    cutover_note: "Cutover time window dependent on RUs, partitions, delete volume - finalized after dry run observations"
+    important_notes:
+      - "Cosmos MongoDB Change Stream API captures inserts and updates only; hard deletes are not natively captured and require additional handling"
+      - "Not recommended for large collections as it can significantly increase cutover time and downtime"
+
+  migration_execution:
+    description: "Migration run effort"
+    hours_per_2tb: 3
+    large_collection_threshold_tb: 15
+    large_collection_note: "Collections >15TB typically require multi-day parallelized migration with tuning and monitoring"
+    cutover_note: "Cutover without reverse sync and hard delete has minimal downtime, depends on CDC backlog, RU availability and source workload"
+
+# MongoDB Compass access requirements
+compass_access:
+  description: "Required for validation and troubleshooting"
+  connectivity:
+    - "Source: Cosmos DB (MongoDB API)"
+    - "Target: MongoDB Atlas"
+  access_options:
+    - "Client-provided Windows VM / VDI"
+    - "Temporary MongoDB VDI (if client access is not available)"
