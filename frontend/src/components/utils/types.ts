@@ -152,8 +152,8 @@ export type MigrationEstimateRequest = {
 export type EnvironmentActivityBreakdown = {
   activity: string;
   description: string;
-  effort_days: number;
-  effort_hours: number;
+  effort_days?: number; // Optional - may not be provided by backend
+  effort_hours?: number; // Optional - may not be provided by backend
 };
 
 /**
@@ -171,8 +171,8 @@ export type PerEnvironmentEstimate = {
   
   // Per-environment activities
   activities: EnvironmentActivityBreakdown[];
-  activities_days: number;
-  activities_hours: number;
+  activities_days?: number; // Optional - may not be provided by backend
+  activities_hours?: number; // Optional - may not be provided by backend
   
   // Environment totals
   total_days: number;
@@ -191,8 +191,8 @@ export type PerEnvironmentEstimate = {
 export type SharedActivityBreakdown = {
   activity: string;
   description: string;
-  effort_days: number;
-  effort_hours: number;
+  effort_days?: number; // Optional - may not be provided by backend
+  effort_hours?: number; // Optional - may not be provided by backend
   note: string;
 };
 
@@ -208,8 +208,8 @@ export type MigrationEstimateResponse = {
   
   // Shared activities (one-time, not per environment)
   shared_activities: SharedActivityBreakdown[];
-  shared_activities_days: number;
-  shared_activities_hours: number;
+  shared_activities_days?: number; // Optional - may not be provided by backend
+  shared_activities_hours?: number; // Optional - may not be provided by backend
   
   // Grand totals
   total_migration_days: number;

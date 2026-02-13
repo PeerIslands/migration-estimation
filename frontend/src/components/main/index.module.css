@@ -1,12 +1,20 @@
+.mainWrapper {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
 .container {
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
+  margin-left: 480px;
   padding: 24px;
   background: var(--background, #ffffff);
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(15, 15, 15, 0.08);
   color: #000000;
+  flex: 1;
   /* font-family: Calibri; */
 }
 
@@ -284,4 +292,28 @@
   color: #6b7280;
 }
 
+.errorMessage {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .container {
+    margin-left: 440px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .container {
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
 

@@ -8,6 +8,7 @@ import type {
   Environment,
   GlobalAnswers,
   MigrationEstimateRequest,
+  MigrationEstimateResponse,
   EnvironmentAnswers,
 } from "@/components/utils/types";
 
@@ -19,12 +20,18 @@ export type FormState = {
   sectionIndex: number;
   submitted: boolean;
   shuffledOrderBySection: ShuffledMap;
+  isSubmitting: boolean;
+  estimationResult: MigrationEstimateResponse | null;
+  submissionError: string | null;
 };
 
 type FormActions = {
   setAnswer: (answerKey: string, value: AnswerValue) => void;
   setSectionIndex: (index: number) => void;
   submit: () => void;
+  setIsSubmitting: (isSubmitting: boolean) => void;
+  setEstimationResult: (result: MigrationEstimateResponse | null) => void;
+  setSubmissionError: (error: string | null) => void;
   reset: (
     formId?: string | null,
     shuffledOrderBySection?: ShuffledMap
@@ -48,6 +55,9 @@ const initialState: FormState = {
   sectionIndex: 0,
   submitted: false,
   shuffledOrderBySection: {},
+  isSubmitting: false,
+  estimationResult: null,
+  submissionError: null,
 };
 
 /**
@@ -92,6 +102,12 @@ export const useFormStore = create<FormState & FormActions>()(
 
       submit: () => set({ submitted: true }),
 
+      setIsSubmitting: (isSubmitting) => set({ isSubmitting }),
+
+      setEstimationResult: (result) => set({ estimationResult: result }),
+
+      setSubmissionError: (error) => set({ submissionError: error }),
+
       reset: (formId, shuffledOrderBySection) =>
         set({
           formId: formId ?? null,
@@ -99,6 +115,9 @@ export const useFormStore = create<FormState & FormActions>()(
           sectionIndex: 0,
           submitted: false,
           shuffledOrderBySection: shuffledOrderBySection ?? {},
+          isSubmitting: false,
+          estimationResult: null,
+          submissionError: null,
         }),
 
       buildEstimateRequest: (): MigrationEstimateRequest => {

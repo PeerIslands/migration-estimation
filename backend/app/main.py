@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.core.config import get_settings
+from app.core.database import connect_to_mongo, close_mongo_connection
 from app.api.v1.controller.router import api_router
 
 
@@ -14,8 +15,10 @@ async def lifespan(app: FastAPI):
     """Application lifespan handler."""
     # Startup
     print(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    await connect_to_mongo()
     yield
     # Shutdown
+    await close_mongo_connection()
     print("Shutting down...")
 
 

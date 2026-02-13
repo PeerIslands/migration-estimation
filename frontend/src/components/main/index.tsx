@@ -17,6 +17,10 @@ import {
   PER_ENV_TABS_SECTION_ID_EXPORT as PER_ENV_TABS_SECTION_ID,
 } from "@/components/utils/helpers";
 import { useFormStore } from "@/components/store/formStore";
+import { submitEstimation, saveEstimation } from "@/lib/api";
+import { useAuthStore } from "@/store/authStore";
+import EstimationResults from "@/components/results/EstimationResults";
+import AIAutofillChatbot from "@/components/ai-autofill/AIAutofillChatbot";
 
 type FormRendererProps = { config: FormConfig };
 
@@ -38,14 +42,22 @@ export default function FormRenderer({ config }: FormRendererProps) {
     sectionIndex,
     submitted,
     shuffledOrderBySection: storedOrder,
+    isSubmitting,
+    estimationResult,
+    submissionError,
     setAnswer,
     setSectionIndex,
     submit,
+    setIsSubmitting,
+    setEstimationResult,
+    setSubmissionError,
     reset,
+    buildEstimateRequest,
   } = useFormStore();
 
   const [errorsByQuestionId, setErrorsByQuestionId] = useState<Record<string, string>>({});
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [isChatbotCollapsed, setIsChatbotCollapsed] = useState(false);
 
   const numEnvironments = Number(answers.number_of_environments) || 0;
 
@@ -182,7 +194,9 @@ export default function FormRenderer({ config }: FormRendererProps) {
     }
   }
 
-  function handleSubmit() {
+  const { isAuthenticated } = useAuthStore();
+
+  async function handleSubmit() {
     // validate all sections before submit (including all environment tabs)
     let valid = true;
     for (const section of sections) {
@@ -191,7 +205,42 @@ export default function FormRenderer({ config }: FormRendererProps) {
     }
     if (!valid) return;
 
-    submit();
+    // Build API request and submit to backend
+    setIsSubmitting(true);
+    setSubmissionError(null);
+
+    try {
+      const request = buildEstimateRequest();
+      const result = await submitEstimation(request);
+      setEstimationResult(result);
+      
+      // Auto-save to database if user is authenticated
+      if (isAuthenticated) {
+        try {
+          const timestamp = new Date().toLocaleString();
+          await saveEstimation({
+            name: `Estimation - ${timestamp}`,
+            request_data: request,
+            response_data: result,
+          });
+          console.log("Estimation saved to database");
+        } catch (saveError) {
+          // Don't block the UI if save fails, just log it
+          console.error("Failed to save estimation:", saveError);
+          // Optionally show a warning but still show results
+        }
+      }
+      
+      submit();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit estimation. Please try again.";
+      setSubmissionError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function incrementFormId(id: string): string {
@@ -203,6 +252,110 @@ export default function FormRenderer({ config }: FormRendererProps) {
     const suffix = id.slice(lastIndex + lastDigits.length);
     const nextNumber = String(parseInt(lastDigits, 10) + 1).padStart(lastDigits.length, "0");
     return `${prefix}${nextNumber}${suffix}`;
+  }
+
+  /**
+   * Handle AI-extracted data and populate the form
+   */
+  function handleAIDataExtracted(data: any) {
+    // Optionally collapse the chatbot after extraction
+    // setIsChatbotCollapsed(true);
+    
+    // Populate global answers
+    if (data.global_answers) {
+      if (data.global_answers.source_api) {
+        setAnswer("source_api", data.global_answers.source_api);
+      }
+      if (data.global_answers.target_cloud) {
+        setAnswer("target_cloud", data.global_answers.target_cloud);
+      }
+      if (data.global_answers.programming_lang_driver_version) {
+        setAnswer("programming_lang_driver_version", data.global_answers.programming_lang_driver_version);
+      }
+      if (data.global_answers.vpn_vpc_required !== undefined) {
+        setAnswer("vpn_vpc_required", data.global_answers.vpn_vpc_required ? "yes" : "no");
+      }
+      if (data.global_answers.is_data_transformation_required !== undefined) {
+        setAnswer("is_data_transformation_required", data.global_answers.is_data_transformation_required ? "yes" : "no");
+      }
+      if (data.global_answers.data_transformation_details) {
+        setAnswer("data_transformation_details", data.global_answers.data_transformation_details);
+      }
+    }
+    
+    // Populate number of environments
+    if (data.number_of_environments) {
+      setAnswer("number_of_environments", data.number_of_environments);
+    }
+    
+    // Populate environment-specific answers
+    if (data.environments && Array.isArray(data.environments)) {
+      data.environments.forEach((env: any, index: number) => {
+        // Environment name
+        if (env.environment_name) {
+          setAnswer(`env_name_${index}`, env.environment_name);
+        }
+        
+        // Required fields
+        if (env.answers) {
+          const envAnswers = env.answers;
+          
+          if (envAnswers.total_data_gb !== undefined) {
+            setAnswer(`total_data_gb_env_${index}`, envAnswers.total_data_gb);
+          }
+          if (envAnswers.number_of_collections !== undefined) {
+            setAnswer(`number_of_collections_env_${index}`, envAnswers.number_of_collections);
+          }
+          if (envAnswers.number_of_databases !== undefined) {
+            setAnswer(`number_of_databases_env_${index}`, envAnswers.number_of_databases);
+          }
+          if (envAnswers.reverse_sync !== undefined) {
+            setAnswer(`reverse_sync_env_${index}`, envAnswers.reverse_sync ? "yes" : "no");
+          }
+          if (envAnswers.hard_deletes !== undefined) {
+            setAnswer(`hard_deletes_env_${index}`, envAnswers.hard_deletes ? "yes" : "no");
+          }
+          
+          // Optional fields
+          if (envAnswers.api_version) {
+            setAnswer(`api_version_env_${index}`, envAnswers.api_version);
+          }
+          if (envAnswers.num_accounts !== undefined) {
+            setAnswer(`num_accounts_env_${index}`, envAnswers.num_accounts);
+          }
+          if (envAnswers.has_partitioned_collections !== undefined) {
+            setAnswer(`has_partitioned_collections_env_${index}`, envAnswers.has_partitioned_collections ? "yes" : "no");
+          }
+          if (envAnswers.ru_configuration) {
+            setAnswer(`ru_configuration_env_${index}`, envAnswers.ru_configuration);
+          }
+          if (envAnswers.read_write_tps) {
+            setAnswer(`read_write_tps_env_${index}`, envAnswers.read_write_tps);
+          }
+          if (envAnswers.num_consumer_apps !== undefined) {
+            setAnswer(`num_consumer_apps_env_${index}`, envAnswers.num_consumer_apps);
+          }
+          if (envAnswers.performs_deletes !== undefined) {
+            setAnswer(`performs_deletes_env_${index}`, envAnswers.performs_deletes ? "yes" : "no");
+          }
+          if (envAnswers.change_stream_required !== undefined) {
+            setAnswer(`change_stream_required_env_${index}`, envAnswers.change_stream_required ? "yes" : "no");
+          }
+          if (envAnswers.app_refactoring_required !== undefined) {
+            setAnswer(`app_refactoring_required_env_${index}`, envAnswers.app_refactoring_required ? "yes" : "no");
+          }
+          if (envAnswers.app_refactoring_details) {
+            setAnswer(`app_refactoring_details_env_${index}`, envAnswers.app_refactoring_details);
+          }
+          if (envAnswers.maintenance_window) {
+            setAnswer(`maintenance_window_env_${index}`, envAnswers.maintenance_window);
+          }
+        }
+      });
+    }
+    
+    // Move to section index 0 to show the setup section with populated data
+    setSectionIndex(0);
   }
 
   function resetForm() {
@@ -416,7 +569,11 @@ export default function FormRenderer({ config }: FormRendererProps) {
     );
   }
 
-  if (submitted) {
+  if (submitted && estimationResult) {
+    return <EstimationResults estimation={estimationResult} onReset={resetForm} />;
+  }
+
+  if (submitted && !estimationResult) {
     return (
       <div className={styles.container}>
         <div className={styles.header}>
@@ -436,11 +593,12 @@ export default function FormRenderer({ config }: FormRendererProps) {
   const currentSection = sections[sectionIndex];
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>{title}</h1>
-        {description ? <p className={styles.description}>{description}</p> : null}
-      </div>
+    <div className={styles.mainWrapper}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>{title}</h1>
+          {description ? <p className={styles.description}>{description}</p> : null}
+        </div>
 
       {showProgress ? (
         <div className={styles.progress} aria-label="Progress">
@@ -510,24 +668,37 @@ export default function FormRenderer({ config }: FormRendererProps) {
       ) : null}
 
       <div className={styles.navRow}>
-        <button type="button" className={styles.secondaryButton} onClick={goBack} disabled={sectionIndex === 0}>
+        <button type="button" className={styles.secondaryButton} onClick={goBack} disabled={sectionIndex === 0 || isSubmitting}>
           Back
         </button>
         {/* Show "Next" if: more sections exist, OR we're on setup and numEnvironments will trigger more sections */}
         {sectionIndex < sections.length - 1 || (currentSection?.sectionId === "setup" && sections.length === 1) ? (
-          <button type="button" className={styles.primaryButton} onClick={goNext}>
+          <button type="button" className={styles.primaryButton} onClick={goNext} disabled={isSubmitting}>
             Next
           </button>
         ) : (
-          <button type="button" className={styles.primaryButton} onClick={handleSubmit}>
-            {submitText}
+          <button type="button" className={styles.primaryButton} onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? "Calculating..." : submitText}
           </button>
         )}
       </div>
 
-      {allowSaveAndResume ? (
-        <div className={styles.saveHint}>Your progress is saved automatically on this device.</div>
-      ) : null}
+      {submissionError && (
+        <div className={styles.errorMessage} role="alert">
+          {submissionError}
+        </div>
+      )}
+
+        {allowSaveAndResume ? (
+          <div className={styles.saveHint}>Your progress is saved automatically on this device.</div>
+        ) : null}
+      </div>
+
+      <AIAutofillChatbot
+        onDataExtracted={handleAIDataExtracted}
+        isCollapsed={isChatbotCollapsed}
+        onToggleCollapse={() => setIsChatbotCollapsed(!isChatbotCollapsed)}
+      />
     </div>
   );
 }
