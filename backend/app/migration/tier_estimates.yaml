@@ -1,0 +1,99 @@
+version: '1.0'
+last_updated: '2026-02-19'
+common_reference:
+  database_count: Up to 10
+  collection_count: Up to 50
+tiers:
+  simple:
+    name: Simple Complexity
+    description: Straightforward migration with up to 250GB data
+    complexity: Simple
+    data_range: Up to 250GB
+    collections_range: Up to 50 collections
+    databases: Up to 10 databases
+    estimated_weeks:
+      min: 1
+      max: 2
+    estimated_cost:
+      min: 10000
+      max: 15000
+    breakdown:
+      planning: 1-2 days
+      migration: 2-5 days
+      testing: 1-2 days
+      deployment: 1 day
+    key_considerations:
+    - Suitable for straightforward migrations with minimal complexity
+    - Standard schema migration without extensive transformations
+    - Limited number of collections and databases
+    - Typical timeline is 5-10 days for single environment
+    - Cost includes planning, execution, and basic support
+    - Supports up to 50 collections across up to 10 databases
+    - Estimate is for up to 3 environments
+  medium:
+    name: Medium Complexity
+    description: Moderate complexity migration with up to 2TB data
+    complexity: Medium
+    data_range: Up to 2TB
+    collections_range: Up to 50 collections
+    databases: Up to 10 databases
+    estimated_weeks:
+      min: 2
+      max: 4
+    estimated_cost:
+      min: 20000
+      max: 30000
+    breakdown:
+      planning: 2-4 days
+      migration: 5-10 days
+      testing: 2-4 days
+      deployment: 1-2 days
+    key_considerations:
+    - Handles moderate data volumes up to 2TB
+    - May involve some schema transformations
+    - Multiple environments or moderate complexity features
+    - Timeline typically ranges from 10-20 days
+    - Cost includes comprehensive planning, migration, and extended support
+    - Supports up to 50 collections across up to 10 databases
+    - Estimate is for up to 3 environments
+  complex:
+    name: Complex Complexity
+    description: Advanced migration with over 2TB data
+    complexity: Complex
+    data_range: Over 2TB
+    collections_range: Up to 50 collections
+    databases: Up to 10 databases
+    estimated_weeks:
+      min: 4
+      max: 12
+    estimated_cost:
+      min: 35000
+      max: 100000
+    breakdown:
+      planning: 3-8 days
+      migration: 10-40 days
+      testing: 4-8 days
+      deployment: 3-4 days
+    key_considerations:
+    - Large-scale migrations with data exceeding 2TB
+    - Complex schema transformations and data modeling
+    - May require performance optimization and tuning
+    - Timeline extends beyond 20 days depending on complexity
+    - Cost starts at $35,000 and scales with project requirements
+    - Dedicated migration team recommended
+    - High availability and minimal downtime requirements
+    - Supports up to 50 collections across up to 10 databases
+    - Estimate is for up to 3 environments
+metadata:
+  currency: USD
+  cost_unit: dollars
+  time_unit: days
+  notes: |
+    Estimates are based on standard migration scenarios and may vary based on:
+    - Specific data volume and complexity
+    - Number of environments
+    - Custom transformation requirements
+    - Performance and availability requirements
+    - Application refactoring needs
+    Database count reference: Up to 10 databases
+    Collection count reference: Up to 50 collections

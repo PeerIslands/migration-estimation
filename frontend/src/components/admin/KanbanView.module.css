@@ -1,0 +1,405 @@
+.kanbanContainer {
+  width: 100%;
+  height: calc(100vh - 250px);
+  overflow-x: auto;
+  overflow-y: auto;
+  padding-bottom: 16px;
+  background: #f5f5f7;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.kanbanContainer::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.kanbanContainer::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.kanbanContainer::-webkit-scrollbar-thumb {
+  background: #b0b0b0;
+  border-radius: 4px;
+}
+
+.kanbanContainer::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+.kanbanBoard {
+  display: flex;
+  gap: 16px;
+  min-height: 100%;
+  padding: 4px;
+  min-width: min-content;
+}
+
+/* Column Styles */
+.kanbanColumn {
+  flex: 0 0 300px;
+  background: #f5f5f7;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.columnHeader {
+  padding: 16px;
+  border-top: 4px solid;
+  border-radius: 12px 12px 0 0;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.columnTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.columnCount {
+  background: #e0e0e0;
+  color: #666;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.columnContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 380px);
+  min-height: 300px;
+}
+
+.columnContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.columnContent::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.columnContent::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+
+.columnContent::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+/* Empty State */
+.emptyColumn {
+  text-align: center;
+  padding: 32px 16px;
+  color: #999;
+  font-style: italic;
+}
+
+.emptyColumn p {
+  margin: 0;
+}
+
+/* Card Styles */
+.kanbanCard {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
+.kanbanCard:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.kanbanCard:active {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+
+.kanbanCard[draggable="true"] {
+  cursor: grab;
+}
+
+.kanbanCard[draggable="false"] {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.kanbanCard[draggable="false"]:hover {
+  border-color: #e0e0e0;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Card Header */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.cardBadge {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  background: #667eea;
+  color: white;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.quickBadge {
+  background: #00a859;
+}
+
+/* Card Info */
+.cardInfo {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.infoIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.infoText {
+  flex: 1;
+  min-width: 0;
+}
+
+.infoLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.infoValue {
+  font-size: 11px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Client Info */
+.clientInfo {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(91, 108, 255, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+  border-left: 3px solid #667eea;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.clientIcon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.clientText {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a1a1a;
+  letter-spacing: 0.3px;
+}
+
+/* Card Details */
+.cardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.detailLabel {
+  color: #666;
+  font-weight: 600;
+}
+
+.detailValue {
+  color: #1a1a1a;
+  font-weight: 700;
+}
+
+/* Card Footer */
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.cardDate {
+  font-size: 11px;
+  color: #999;
+}
+
+.unreadIndicator {
+  color: #dc3545;
+  font-size: 18px;
+  line-height: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .kanbanColumn {
+    flex: 0 0 280px;
+  }
+
+  .cardTitle {
+    font-size: 13px;
+  }
+
+  .columnTitle {
+    font-size: 14px;
+  }
+}
+
+/* Card Footer Right */
+.cardFooterRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewIcon {
+  font-size: 16px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+.kanbanCard:hover .viewIcon {
+  opacity: 1;
+}
+
+/* Expanded Details */
+.expandedDetails {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 16px;
+  margin-top: -8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding: 0 16px;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+    padding: 16px;
+  }
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailLabel {
+  font-size: 12px;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detailValue {
+  font-size: 13px;
+  color: #1a1a1a;
+  font-weight: 600;
+  text-align: right;
+  word-break: break-word;
+}
+
+.enquiryText {
+  background: #f8f9fa;
+  border: 2px solid #e8ebff;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 13px;
+  color: #1a1a1a;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}

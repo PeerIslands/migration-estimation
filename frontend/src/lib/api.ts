@@ -239,22 +239,147 @@ export async function getAssumptions(): Promise<{
 }
 
 /**
- * Save estimation to database (requires auth)
+ * Update assumptions.yaml content (Admin only)
+ */
+export async function updateAssumptions(content: string): Promise<{
+  message: string;
+  backup_created: string;
+  updated_by: string;
+}> {
+  return apiClient("/admin/assumptions", {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  }, true);
+}
+
+/**
+ * Save estimation to database (authentication optional)
  */
 export async function saveEstimation(data: {
   name?: string;
-  request_data: MigrationEstimateRequest;
-  response_data: MigrationEstimateResponse;
+  estimation_type: "quick" | "detailed";
+  request_data?: MigrationEstimateRequest;
+  response_data?: MigrationEstimateResponse;
+  quick_estimate_data?: any;
+  client_name?: string;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
+  enquiry?: string;
+  has_enquiry?: boolean;
+  lead_status?: string;
 }): Promise<{
   _id: string;
-  user_id: string;
+  user_id?: string;
   name?: string;
+  estimation_type: string;
+  client_name?: string;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
+  enquiry?: string;
+  has_enquiry?: boolean;
   created_at: string;
   updated_at: string;
 }> {
   return apiClient("/estimations/", {
     method: "POST",
     body: JSON.stringify(data),
+  }, false); // Changed to false - auth not required
+}
+
+/**
+ * Update an existing estimation (e.g., replace quick with detailed)
+ */
+export async function updateEstimation(estimationId: string, data: {
+  name?: string;
+  estimation_type: "quick" | "detailed";
+  request_data?: MigrationEstimateRequest;
+  response_data?: MigrationEstimateResponse;
+  quick_estimate_data?: any;
+  client_name?: string;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
+  enquiry?: string;
+  has_enquiry?: boolean;
+  lead_status?: string;
+}): Promise<{
+  _id: string;
+  user_id?: string;
+  name?: string;
+  estimation_type: string;
+  client_name?: string;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
+  enquiry?: string;
+  has_enquiry?: boolean;
+  created_at: string;
+  updated_at: string;
+}> {
+  return apiClient(`/estimations/${estimationId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  }, false); // Changed to false - auth not required
+}
+
+/**
+ * Add enquiry to an existing estimation
+ */
+export async function addEnquiryToEstimation(estimationId: string, enquiry: string): Promise<{ message: string }> {
+  return apiClient(`/estimations/${estimationId}/add-enquiry`, {
+    method: "PATCH",
+    body: JSON.stringify({ enquiry }),
+  }, false); // No auth required
+}
+
+/**
+ * Mark enquiry as read (Admin only)
+ */
+export async function markEnquiryRead(estimationId: string): Promise<{ message: string }> {
+  return apiClient(`/estimations/${estimationId}/mark-enquiry-read`, {
+    method: "PATCH",
+  }, true);
+}
+
+/**
+ * Get unread enquiries count (Admin only)
+ */
+export async function getUnreadEnquiriesCount(): Promise<{ unread_count: number }> {
+  return apiClient("/estimations/admin/enquiries/count", {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Update lead status for an estimation (Admin only)
+ */
+export async function updateLeadStatus(estimationId: string, leadStatus: string): Promise<{ message: string; lead_status: string }> {
+  return apiClient(`/estimations/${estimationId}/update-lead-status`, {
+    method: "PATCH",
+    body: JSON.stringify({ lead_status: leadStatus }),
+  }, true);
+}
+
+/**
+ * Get lead status counts (Admin only)
+ */
+export async function getLeadStatusCounts(): Promise<{
+  new: number;
+  under_review: number;
+  quote_sent: number;
+  converted: number;
+  rejected: number;
+  cold: number;
+  total: number;
+}> {
+  return apiClient("/estimations/admin/leads/status-counts", {
+    method: "GET",
   }, true);
 }
 
@@ -264,12 +389,154 @@ export async function saveEstimation(data: {
 export async function getSavedEstimations(): Promise<Array<{
   _id: string;
   name?: string;
-  migration_type: string;
-  number_of_environments: number;
-  total_migration_days: number;
+  estimation_type: string;
+  migration_type?: string;
+  number_of_environments?: number;
+  total_migration_days?: number;
+  data_size?: string;
+  estimated_weeks_min?: number;
+  estimated_weeks_max?: number;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
   created_at: string;
 }>> {
   return apiClient("/estimations/", {
     method: "GET",
   }, true);
+}
+
+/**
+ * Get all estimations (Admin only)
+ */
+export async function getAllEstimationsAdmin(): Promise<Array<{
+  _id: string;
+  name?: string;
+  estimation_type: string;
+  migration_type?: string;
+  number_of_environments?: number;
+  total_migration_days?: number;
+  data_size?: string;
+  estimated_weeks_min?: number;
+  estimated_weeks_max?: number;
+  user_name?: string;
+  user_email?: string;
+  user_designation?: string;
+  user_company?: string;
+  enquiry?: string;
+  has_enquiry: boolean;
+  enquiry_read: boolean;
+  lead_status?: string;
+  lead_status_updated_at?: string;
+  created_at: string;
+}>> {
+  return apiClient("/estimations/admin/all", {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Get full estimation details for admin (Admin only)
+ */
+export async function getFullEstimationAdmin(estimationId: string): Promise<any> {
+  return apiClient(`/estimations/admin/${estimationId}`, {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Archive an estimation (Admin only)
+ */
+export async function archiveEstimation(estimationId: string): Promise<{ message: string }> {
+  return apiClient(`/estimations/${estimationId}/archive`, {
+    method: "PATCH",
+  }, true);
+}
+
+/**
+ * Unarchive an estimation (Admin only)
+ */
+export async function unarchiveEstimation(estimationId: string): Promise<{ message: string }> {
+  return apiClient(`/estimations/${estimationId}/unarchive`, {
+    method: "PATCH",
+  }, true);
+}
+
+/**
+ * Get all archived estimations (Admin only)
+ */
+export async function getArchivedEstimationsAdmin(): Promise<any[]> {
+  return apiClient("/estimations/admin/archived", {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Get inactivity reminders (Admin only)
+ */
+export async function getInactivityReminders(): Promise<any[]> {
+  return apiClient("/estimations/admin/reminders", {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Update cold status for inactive estimations (Admin only)
+ */
+export async function updateColdStatus(): Promise<{ message: string; count: number }> {
+  return apiClient("/estimations/admin/update-cold-status", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }, true);
+}
+
+/**
+ * Get tier estimates configuration (Public)
+ */
+export async function getTierEstimates(): Promise<{
+  version: string;
+  last_updated: string;
+  tiers: Record<string, any>;
+  metadata: Record<string, any>;
+}> {
+  return apiClient("/tier-estimates", {
+    method: "GET",
+  });
+}
+
+/**
+ * Get tier estimates raw YAML content (Admin only)
+ */
+export async function getTierEstimatesRaw(): Promise<{
+  content: string;
+}> {
+  return apiClient("/tier-estimates/raw", {
+    method: "GET",
+  }, true);
+}
+
+/**
+ * Update tier estimates from raw YAML (Admin only)
+ */
+export async function updateTierEstimatesRaw(content: string): Promise<{
+  success: boolean;
+  message: string;
+  last_updated: string;
+}> {
+  return apiClient("/tier-estimates/raw", {
+    method: "PUT",
+    body: JSON.stringify({ content }),
+  }, true);
+}
+
+/**
+ * Get a single tier estimate by name
+ */
+export async function getSingleTierEstimate(tierName: string): Promise<any> {
+  return apiClient(`/tier-estimates/${tierName}`, {
+    method: "GET",
+  });
 }

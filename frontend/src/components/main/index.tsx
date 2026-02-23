@@ -17,14 +17,24 @@ import {
   PER_ENV_TABS_SECTION_ID_EXPORT as PER_ENV_TABS_SECTION_ID,
 } from "@/components/utils/helpers";
 import { useFormStore } from "@/components/store/formStore";
-import { submitEstimation, saveEstimation } from "@/lib/api";
+import { submitEstimation, saveEstimation, updateEstimation, addEnquiryToEstimation } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
 import EstimationResults from "@/components/results/EstimationResults";
 import AIAutofillChatbot from "@/components/ai-autofill/AIAutofillChatbot";
 
-type FormRendererProps = { config: FormConfig };
+type FormRendererProps = { 
+  config: FormConfig;
+  userInfo?: {
+    name?: string;
+    email?: string;
+    designation?: string;
+    company?: string;
+  };
+  clientName?: string;
+  quickEstimationId?: string | null;
+};
 
-export default function FormRenderer({ config }: FormRendererProps) {
+export default function FormRenderer({ config, userInfo, clientName, quickEstimationId }: FormRendererProps) {
   const { formId, title, description, sections: rawSections, settings } = config;
 
   // Track an active form id that can be incremented after submit
@@ -32,7 +42,7 @@ export default function FormRenderer({ config }: FormRendererProps) {
 
   const shuffleQuestions = settings?.shuffleQuestions ?? false;
   const showProgress = settings?.progressBar ?? false;
-  const submitText = settings?.submitButtonText ?? "Submit";
+  const submitText = settings?.submitButtonText ?? "Request Quote";
   const thankYouMessage = settings?.thankYouMessage ?? "Thank you!";
   const allowSaveAndResume = settings?.allowSaveAndResume ?? false;
 
@@ -58,8 +68,46 @@ export default function FormRenderer({ config }: FormRendererProps) {
   const [errorsByQuestionId, setErrorsByQuestionId] = useState<Record<string, string>>({});
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isChatbotCollapsed, setIsChatbotCollapsed] = useState(false);
+  const [savedEstimationId, setSavedEstimationId] = useState<string | null>(null);
 
   const numEnvironments = Number(answers.number_of_environments) || 0;
+
+  // Warn user before leaving/refreshing page if form is in progress
+  useEffect(() => {
+    const hasAnswers = Object.keys(answers).length > 0;
+    const isFormInProgress = !submitted && hasAnswers;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isFormInProgress) {
+        e.preventDefault();
+        // Modern browsers ignore custom messages, but setting returnValue triggers the dialog
+        e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    if (isFormInProgress) {
+      window.addEventListener("beforeunload", handleBeforeUnload);
+    }
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [answers, submitted]);
+
+  const handleEnquirySubmit = async (enquiry: string) => {
+    if (!savedEstimationId) {
+      console.error("No saved estimation ID to attach enquiry to");
+      return;
+    }
+
+    try {
+      await addEnquiryToEstimation(savedEstimationId, enquiry);
+      console.log("Enquiry submitted successfully");
+    } catch (error) {
+      console.error("Failed to submit enquiry:", error);
+    }
+  };
 
   // Build effective sections: setup first, then common + per-env questions based on num_environments
   const sections: Section[] = useMemo(() => {
@@ -214,21 +262,42 @@ export default function FormRenderer({ config }: FormRendererProps) {
       const result = await submitEstimation(request);
       setEstimationResult(result);
       
-      // Auto-save to database if user is authenticated
-      if (isAuthenticated) {
-        try {
-          const timestamp = new Date().toLocaleString();
-          await saveEstimation({
-            name: `Estimation - ${timestamp}`,
-            request_data: request,
-            response_data: result,
-          });
-          console.log("Estimation saved to database");
-        } catch (saveError) {
-          // Don't block the UI if save fails, just log it
-          console.error("Failed to save estimation:", saveError);
-          // Optionally show a warning but still show results
+      // Auto-save to database (works for both authenticated and non-authenticated users)
+      try {
+        const timestamp = new Date().toLocaleString();
+        const estimationData = {
+          name: `Detailed Estimation - ${timestamp}`,
+          estimation_type: "detailed" as const,
+          request_data: request,
+          response_data: result,
+          client_name: clientName || undefined,
+          user_name: userInfo?.name,
+          user_email: userInfo?.email,
+          user_designation: userInfo?.designation,
+          user_company: userInfo?.company,
+          // All detailed estimations are quote requests
+          has_enquiry: true,
+          enquiry: "Quote request submitted for detailed migration estimation",
+          lead_status: "new",
+        };
+
+        let savedEstimation;
+        if (quickEstimationId) {
+          // Update existing quick estimate with detailed data
+          console.log("Updating existing quick estimation with ID:", quickEstimationId);
+          savedEstimation = await updateEstimation(quickEstimationId, estimationData);
+          console.log("Quick estimation updated to detailed estimation");
+        } else {
+          // Create new detailed estimation
+          savedEstimation = await saveEstimation(estimationData);
+          console.log("New detailed estimation saved to database");
         }
+        
+        setSavedEstimationId(savedEstimation._id);
+      } catch (saveError) {
+        // Don't block the UI if save fails, just log it
+        console.error("Failed to save estimation:", saveError);
+        // Optionally show a warning but still show results
       }
       
       submit();
@@ -570,7 +639,26 @@ export default function FormRenderer({ config }: FormRendererProps) {
   }
 
   if (submitted && estimationResult) {
-    return <EstimationResults estimation={estimationResult} onReset={resetForm} />;
+    // For detailed estimations, show quote request confirmation instead of full results
+    return (
+      <div className={styles.container}>
+        <div className={styles.quoteRequestSuccess}>
+          <div className={styles.successIcon}>✓</div>
+          <h2 className={styles.successTitle}>Quote Request Submitted Successfully!</h2>
+          <p className={styles.successMessage}>
+            Thank you for submitting your migration estimation request. Our team has received your information and will analyze your requirements.
+          </p>
+          <p className={styles.successMessage}>
+            We will get back to you shortly with a detailed quote tailored to your specific needs.
+          </p>
+          <div className={styles.centeredButtonRow}>
+            <button type="button" className={styles.primaryButton} onClick={resetForm}>
+              Submit Another Request
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (submitted && !estimationResult) {
@@ -678,7 +766,7 @@ export default function FormRenderer({ config }: FormRendererProps) {
           </button>
         ) : (
           <button type="button" className={styles.primaryButton} onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? "Calculating..." : submitText}
+            {isSubmitting ? "Submitting Request..." : "Request Quote"}
           </button>
         )}
       </div>

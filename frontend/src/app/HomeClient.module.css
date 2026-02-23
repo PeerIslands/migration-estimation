@@ -5,11 +5,13 @@
   align-items: center;
   min-height: 100vh;
   padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--bg-hero, #020916);
+  position: relative;
+  overflow: hidden;
 }
 
 .getStartedCard {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(26, 31, 46, 0.95);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 20px;
@@ -17,21 +19,25 @@
   text-align: center;
   max-width: 540px;
   width: 100%;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 }
 
 .getStartedTitle {
   font-size: 36px;
   font-weight: 700;
   margin: 0 0 16px 0;
-  color: #000000;
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
   letter-spacing: -0.02em;
+  background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.8));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .getStartedDescription {
   font-size: 16px;
-  color: #666666;
+  color: var(--text-muted, rgba(239, 237, 253, 0.7));
   margin: 0 0 36px 0;
   line-height: 1.6;
 }
@@ -46,20 +52,20 @@
   padding: 16px 36px;
   font-size: 16px;
   font-weight: 600;
-  color: white;
-  background: rgba(0, 122, 255, 0.95);
+  color: #ffffff;
+  background: var(--accent-primary, #5b6cff);
   backdrop-filter: blur(10px);
   border: none;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(91, 108, 255, 0.35);
 }
 
 .getStartedButton:hover {
-  background: #007aff;
+  background: var(--accent-primary-hover, #4a5ae8);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(91, 108, 255, 0.45);
 }
 
 .mainContainer {
@@ -75,6 +81,48 @@
   right: 0;
   padding: 16px 24px;
   z-index: 100;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.backToHomeButton {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, rgba(239, 237, 253, 0.7));
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.backToHomeButton:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
+  transform: translateX(-2px);
+}
+
+.loginLink {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.2));
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.loginLink:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--border-strong, rgba(255, 255, 255, 0.3));
+  transform: translateY(-1px);
 }
 
 @media (max-width: 768px) {

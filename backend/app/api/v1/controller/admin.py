@@ -16,6 +16,11 @@ class RulesUpdate(BaseModel):
     content: str
 
 
+class AssumptionsUpdate(BaseModel):
+    """Schema for updating assumptions."""
+    content: str
+
+
 @router.get("/rules")
 async def get_rules(
     current_user: dict = Depends(get_current_admin_user)
@@ -146,4 +151,53 @@ async def get_assumptions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error reading assumptions file: {str(e)}"
+        )
+
+
+@router.put("/assumptions")
+async def update_assumptions(
+    assumptions: AssumptionsUpdate,
+    current_user: dict = Depends(get_current_admin_user)
+):
+    """
+    Update the assumptions.yaml file.
+    Admin only endpoint.
+    
+    Validates YAML syntax before saving.
+    """
+    assumptions_path = RULES_FILE_PATH.parent / "assumptions.yaml"
+    
+    try:
+        # Validate YAML syntax
+        try:
+            yaml.safe_load(assumptions.content)
+        except yaml.YAMLError as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid YAML syntax: {str(e)}"
+            )
+        
+        # Create backup of current file
+        backup_path = assumptions_path.with_suffix('.yaml.backup')
+        if assumptions_path.exists():
+            with open(assumptions_path, 'r', encoding='utf-8') as f:
+                backup_content = f.read()
+            with open(backup_path, 'w', encoding='utf-8') as f:
+                f.write(backup_content)
+        
+        # Write new content
+        with open(assumptions_path, 'w', encoding='utf-8') as f:
+            f.write(assumptions.content)
+        
+        return {
+            "message": "Assumptions updated successfully",
+            "backup_created": str(backup_path),
+            "updated_by": current_user.get("username")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error updating assumptions file: {str(e)}"
         )

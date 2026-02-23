@@ -4,33 +4,39 @@
   align-items: center;
   min-height: 100vh;
   padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: var(--bg-hero, #020916);
+  position: relative;
+  overflow: hidden;
 }
 
 .authCard {
   width: 100%;
   max-width: 440px;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(26, 31, 46, 0.95);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-radius: 20px;
   padding: 48px 40px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 }
 
 .authTitle {
   font-size: 32px;
   font-weight: 700;
-  color: #000000;
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
   margin: 0 0 8px 0;
   text-align: center;
   letter-spacing: -0.02em;
+  background: linear-gradient(to bottom, #ffffff, rgba(255, 255, 255, 0.8));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .authSubtitle {
   font-size: 15px;
-  color: #666666;
+  color: var(--text-muted, rgba(239, 237, 253, 0.7));
   margin: 0 0 36px 0;
   text-align: center;
   font-weight: 400;
@@ -51,7 +57,7 @@
 .label {
   font-size: 14px;
   font-weight: 700;
-  color: #000000;
+  color: var(--text-secondary, #f4f0ff);
   letter-spacing: -0.01em;
 }
 
@@ -59,30 +65,30 @@
   width: 100%;
   padding: 14px 16px;
   font-size: 15px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-medium, rgba(255, 255, 255, 0.2));
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   outline: none;
   transition: all 0.3s ease;
-  color: #000000;
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
   box-sizing: border-box;
 }
 
 .input::placeholder {
-  color: #999999;
+  color: var(--text-muted, rgba(239, 237, 253, 0.5));
 }
 
 .input:focus {
-  border-color: rgba(0, 122, 255, 0.5);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  border-color: var(--accent-primary, #5b6cff);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(91, 108, 255, 0.2);
 }
 
 .input:disabled {
-  background: rgba(245, 245, 245, 0.8);
+  background: rgba(255, 255, 255, 0.02);
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
 .submitButton {
@@ -90,21 +96,21 @@
   padding: 16px;
   font-size: 16px;
   font-weight: 600;
-  color: white;
-  background: rgba(0, 122, 255, 0.95);
+  color: #ffffff;
+  background: var(--accent-primary, #5b6cff);
   backdrop-filter: blur(10px);
   border: none;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 8px;
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(91, 108, 255, 0.35);
 }
 
 .submitButton:hover:not(:disabled) {
-  background: #007aff;
+  background: var(--accent-primary-hover, #4a5ae8);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(91, 108, 255, 0.45);
 }
 
 .submitButton:active:not(:disabled) {
@@ -119,11 +125,11 @@
 
 .errorMessage {
   padding: 14px 16px;
-  background: rgba(255, 59, 48, 0.1);
+  background: rgba(255, 82, 82, 0.1);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 59, 48, 0.3);
+  border: 1px solid rgba(255, 82, 82, 0.3);
   border-radius: 12px;
-  color: #ff3b30;
+  color: var(--error, #ff5252);
   font-size: 14px;
   font-weight: 500;
 }
@@ -132,13 +138,13 @@
   margin-top: 28px;
   text-align: center;
   font-size: 15px;
-  color: #666666;
+  color: var(--text-muted, rgba(239, 237, 253, 0.7));
 }
 
 .switchButton {
   background: none;
   border: none;
-  color: #007aff;
+  color: var(--accent-link, #00d4ff);
   font-weight: 600;
   cursor: pointer;
   padding: 0;
@@ -149,7 +155,7 @@
 
 .switchButton:hover {
   text-decoration: underline;
-  color: #0051d5;
+  color: var(--accent-link-hover, #00ff88);
 }
 
 /* User Menu Styles */
@@ -180,14 +186,15 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #007aff 0%, #0051d5 100%);
+  background: linear-gradient(135deg, var(--accent-primary, #5b6cff) 0%, #8b5cf6 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   font-weight: 600;
   font-size: 16px;
   transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(91, 108, 255, 0.3);
 }
 
 .userInfo {
@@ -198,12 +205,12 @@
 
 .userName {
   font-weight: 600;
-  color: #000000;
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
 }
 
 .userRole {
   font-size: 12px;
-  color: #666;
+  color: var(--text-muted, rgba(239, 237, 253, 0.6));
   text-transform: capitalize;
 }
 
@@ -212,11 +219,11 @@
   top: calc(100% + 8px);
   right: 0;
   min-width: 200px;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(26, 31, 46, 0.98);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 1000;
   overflow: hidden;
 }
@@ -228,21 +235,21 @@
   border: none;
   text-align: left;
   font-size: 14px;
-  color: #000000;
+  color: var(--text-primary, rgba(255, 255, 255, 0.87));
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .dropdownItem:hover {
-  background: rgba(0, 122, 255, 0.08);
+  background: rgba(91, 108, 255, 0.15);
 }
 
 .dropdownItem.danger {
-  color: #ff3b30;
+  color: var(--error, #ff5252);
 }
 
 .dropdownItem.danger:hover {
-  background: rgba(255, 59, 48, 0.08);
+  background: rgba(255, 82, 82, 0.1);
 }
 
 @media (max-width: 768px) {

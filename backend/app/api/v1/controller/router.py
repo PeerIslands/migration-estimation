@@ -4,6 +4,7 @@ from app.api.v1.controller.auth import router as auth_router
 from app.api.v1.controller.saved_estimations import router as saved_estimations_router
 from app.api.v1.controller.admin import router as admin_router
 from app.api.v1.controller.ai_autofill import router as ai_autofill_router
+from app.api.v1.controller.tier_estimates import router as tier_estimates_router
 
 api_router = APIRouter()
 
@@ -40,4 +41,10 @@ api_router.include_router(
     admin_router,
     prefix="/admin",
     tags=["admin"]
+)
+
+# Tier estimates routes (public read, admin write)
+api_router.include_router(
+    tier_estimates_router,
+    tags=["tier-estimates"]
 )

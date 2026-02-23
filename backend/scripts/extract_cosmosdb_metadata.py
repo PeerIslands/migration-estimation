@@ -1,51 +1,43 @@
 #!/usr/bin/env python3
 """
-CosmosDB Metadata Extraction Script
+CosmosDB Metadata Extraction Script (via MongoDB API)
 
-This script connects to an Azure CosmosDB account and extracts all relevant
-information needed for migration estimation.
+This script connects to an Azure CosmosDB account using the MongoDB API and extracts
+all relevant information needed for migration estimation.
 
 Usage:
-    python extract_cosmosdb_metadata.py <connection_string>
+    python extract_cosmosdb_metadata.py <mongodb_connection_string>
     
 Example:
-    python extract_cosmosdb_metadata.py "AccountEndpoint=https://myaccount.documents.azure.com:443/;AccountKey=..."
+    python extract_cosmosdb_metadata.py "mongodb://account:key@account.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000"
 """
 
 import sys
 import json
-import re
 from datetime import datetime
 from typing import Dict, Any, List
-from azure.cosmos import CosmosClient, exceptions
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 
 class CosmosDBExtractor:
-    """Extract comprehensive metadata from Azure CosmosDB for migration estimation."""
+    """Extract comprehensive metadata from Azure CosmosDB (MongoDB API) for migration estimation."""
     
     def __init__(self, connection_string: str):
         self.connection_string = connection_string
-        self.endpoint, self.key = self._parse_connection_string(connection_string)
         self.client = None
-    
-    def _parse_connection_string(self, connection_string: str) -> tuple[str, str]:
-        """Parse CosmosDB connection string."""
-        endpoint_match = re.search(r'AccountEndpoint=([^;]+)', connection_string)
-        key_match = re.search(r'AccountKey=([^;]+)', connection_string)
-        
-        if not endpoint_match or not key_match:
-            raise ValueError("Invalid connection string format")
-        
-        return endpoint_match.group(1).strip(), key_match.group(1).strip()
     
     def connect(self) -> bool:
         """Connect to CosmosDB and verify connection."""
         try:
-            self.client = CosmosClient(self.endpoint, self.key)
-            # Test connection by listing databases
-            list(self.client.list_databases())
-            print(f"✅ Connected to CosmosDB account")
+            self.client = MongoClient(self.connection_string, serverSelectionTimeoutMS=5000)
+            # Test connection
+            self.client.admin.command('ping')
+            print(f"✅ Connected to CosmosDB account (MongoDB API)")
             return True
+        except ConnectionFailure as e:
+            print(f"❌ Failed to connect: {str(e)}")
+            return False
         except Exception as e:
             print(f"❌ Failed to connect: {str(e)}")
             return False
@@ -54,21 +46,27 @@ class CosmosDBExtractor:
         """Discover all databases in the account."""
         print("\n📊 Discovering databases...\n")
         
+        # Get all database names
+        db_names = self.client.list_database_names()
+        
+        # Filter out system databases
+        system_dbs = ['admin', 'local', 'config']
+        user_dbs = [db for db in db_names if db not in system_dbs]
+        
         databases = []
-        for db_props in self.client.list_databases():
-            db_name = db_props['id']
+        for db_name in user_dbs:
             print(f"  → Found database: {db_name}")
             
             try:
-                db_client = self.client.get_database_client(db_name)
-                containers = list(db_client.list_containers())
+                db = self.client[db_name]
+                collections = db.list_collection_names()
                 
                 databases.append({
                     "name": db_name,
-                    "num_containers": len(containers),
-                    "containers": [c['id'] for c in containers]
+                    "num_containers": len(collections),
+                    "containers": collections
                 })
-                print(f"    ✓ {len(containers)} containers")
+                print(f"    ✓ {len(collections)} collections")
                 
             except Exception as e:
                 print(f"    ⚠️  Error: {str(e)}")
@@ -84,70 +82,100 @@ class CosmosDBExtractor:
         """Extract detailed metadata for a single database."""
         print(f"\n  → Extracting metadata for: {db_name}")
         
-        db_client = self.client.get_database_client(db_name)
-        containers = list(db_client.list_containers())
+        db = self.client[db_name]
+        collections = db.list_collection_names()
         
         container_details = []
         total_docs = 0
         has_nested_docs = False
-        has_partitioned = False
+        has_sharded = False
+        total_size_bytes = 0
         
-        for container_props in containers:
-            container_name = container_props['id']
-            
+        for coll_name in collections:
             try:
-                container = db_client.get_container_client(container_name)
-                properties = container.read()
+                collection = db[coll_name]
                 
-                # Check for partition key
-                has_partition = 'partitionKey' in properties
-                if has_partition:
-                    has_partitioned = True
+                # Get collection stats
+                is_sharded = False
+                doc_count = 0
+                shard_key = None
                 
-                # Try to count documents
                 try:
-                    query_result = list(container.query_items(
-                        query="SELECT VALUE COUNT(1) FROM c",
-                        enable_cross_partition_query=True
-                    ))
-                    doc_count = query_result[0] if query_result else 0
+                    stats = db.command("collStats", coll_name)
+                    
+                    # Check if sharded (CosmosDB uses sharding)
+                    is_sharded = stats.get("sharded", False)
+                    if is_sharded:
+                        has_sharded = True
+                        shard_key = stats.get("shardKey")
+                    
+                    # Get document count
+                    doc_count = stats.get("count", 0)
                     total_docs += doc_count
-                except:
-                    doc_count = 0
+                    
+                    # Try multiple size fields (CosmosDB may use different ones)
+                    size_bytes = (
+                        stats.get("size", 0) or           # Uncompressed data size
+                        stats.get("storageSize", 0) or    # On-disk storage size
+                        stats.get("totalSize", 0) or      # Total size including indexes
+                        stats.get("totalIndexSize", 0)    # Just indexes
+                    )
+                    total_size_bytes += size_bytes
+                    
+                except OperationFailure:
+                    # If collStats not supported, fall back to count
+                    try:
+                        doc_count = collection.estimated_document_count()
+                        total_docs += doc_count
+                    except:
+                        pass
                 
                 # Sample document for schema analysis
                 if not has_nested_docs:
                     try:
-                        samples = list(container.query_items(
-                            query="SELECT TOP 1 * FROM c",
-                            enable_cross_partition_query=True
-                        ))
-                        if samples:
-                            for value in samples[0].values():
-                                if isinstance(value, (dict, list)):
+                        sample = collection.find_one()
+                        if sample:
+                            for key, value in sample.items():
+                                if key != '_id' and isinstance(value, (dict, list)):
                                     has_nested_docs = True
                                     break
                     except:
                         pass
                 
                 container_details.append({
-                    "name": container_name,
+                    "name": coll_name,
                     "document_count": doc_count,
-                    "has_partition_key": has_partition,
-                    "partition_key": properties.get('partitionKey', {}).get('paths', [])[0] if 'partitionKey' in properties else None
+                    "has_sharding": is_sharded,
+                    "shard_key": str(shard_key) if shard_key else None
                 })
                 
-                print(f"    ✓ {container_name}: {doc_count} documents")
+                print(f"    ✓ {coll_name}: {doc_count:,} documents")
                 
             except Exception as e:
-                print(f"    ⚠️  Error with {container_name}: {str(e)}")
+                print(f"    ⚠️  Error with {coll_name}: {str(e)}")
+        
+        # Try to get database-level stats as fallback
+        if total_size_bytes == 0:
+            try:
+                db_stats = db.command("dbStats")
+                db_size_bytes = (
+                    db_stats.get("dataSize", 0) or
+                    db_stats.get("storageSize", 0) or
+                    db_stats.get("totalSize", 0)
+                )
+                if db_size_bytes > 0:
+                    total_size_bytes = db_size_bytes
+                    print(f"    ℹ️  Using database-level size: {db_size_bytes / (1024**3):.2f} GB")
+            except Exception as e:
+                print(f"    ⚠️  Could not get database-level stats: {str(e)}")
         
         return {
             "database_name": db_name,
-            "num_containers": len(containers),
+            "num_containers": len(collections),
             "total_documents": total_docs,
+            "total_size_gb": round(total_size_bytes / (1024 ** 3), 2) if total_size_bytes > 0 else 0,
             "has_nested_documents": has_nested_docs,
-            "has_partitioned_collections": has_partitioned,
+            "has_partitioned_collections": has_sharded,
             "containers": container_details
         }
 
@@ -204,17 +232,17 @@ def main():
     """Main execution function."""
     
     if len(sys.argv) < 2:
-        print("Usage: python extract_cosmosdb_metadata.py <connection_string>")
+        print("Usage: python extract_cosmosdb_metadata.py <mongodb_connection_string>")
         print("\nExample:")
-        print('  python extract_cosmosdb_metadata.py "AccountEndpoint=https://...;AccountKey=..."')
-        print("\nGet connection string from:")
-        print("  Azure Portal → Your CosmosDB Account → Keys → PRIMARY CONNECTION STRING")
+        print('  python extract_cosmosdb_metadata.py "mongodb://account:key@account.mongo.cosmos.azure.com:10255/..."')
+        print("\nGet MongoDB connection string from:")
+        print("  Azure Portal → Your CosmosDB Account → Connection String → PRIMARY CONNECTION STRING (MongoDB format)")
         sys.exit(1)
     
     connection_string = sys.argv[1]
     
     print("=" * 70)
-    print("☁️  CosmosDB Metadata Extractor for Migration Estimation")
+    print("☁️  CosmosDB (MongoDB API) Metadata Extractor for Migration Estimation")
     print("=" * 70)
     
     extractor = CosmosDBExtractor(connection_string)
@@ -317,8 +345,8 @@ def main():
         print("\n📝 Questionnaire Summary:")
         print(json.dumps(questionnaire, indent=2))
         
-        print("\n⚠️  NOTE: CosmosDB does not expose total data size via SDK.")
-        print("   Get data size from: Azure Portal → Metrics → Data Usage")
+        print("\n⚠️  NOTE: Data size may not be fully accurate via MongoDB API.")
+        print("   For precise size: Azure Portal → Metrics → Data Usage")
         
     except KeyboardInterrupt:
         print("\n\n❌ Cancelled by user")

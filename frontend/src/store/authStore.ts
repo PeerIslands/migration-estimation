@@ -12,6 +12,7 @@ import {
   type LoginCredentials,
   type RegisterData
 } from "@/lib/api";
+import { useFormStore } from "@/components/store/formStore";
 
 type AuthState = {
   user: UserResponse | null;
@@ -95,12 +96,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         logout: () => {
           removeAuthToken();
+          sessionStorage.removeItem("admin_access_allowed");
           set({
             user: null,
             token: null,
             isAuthenticated: false,
             error: null,
           });
+          // Clear form state on logout to prevent data persistence across sessions
+          useFormStore.getState().reset();
         },
 
         loadUser: async () => {

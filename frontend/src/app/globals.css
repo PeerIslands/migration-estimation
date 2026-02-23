@@ -1,26 +1,95 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fcfcfc;
-  --foreground: #000000;
+  /* MongoDB Microsite Theme - Dark Mode */
+  
+  /* Backgrounds */
+  --bg-primary: #0a0a0a;
+  --bg-hero: #020916;
+  --bg-footer: #030014;
+  --bg-card: #1a1f2e;
+  --bg-secondary: #0d1321;
+  
+  /* Accent Colors */
+  --accent-primary: #5b6cff;
+  --accent-primary-hover: #4a5ae8;
+  --accent-green: #00ED64;
+  --accent-green-dark: #00684A;
+  --accent-link: #00d4ff;
+  --accent-link-hover: #00ff88;
+  
+  /* Text Colors */
+  --text-primary: rgba(255, 255, 255, 0.87);
+  --text-secondary: #f4f0ff;
+  --text-muted: rgba(239, 237, 253, 0.6);
+  --text-dark: #0d0d0d;
+  --text-gray: #6c757d;
+  
+  /* Borders & Overlays */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  --border-strong: rgba(255, 255, 255, 0.3);
+  
+  /* UI Elements */
+  --white-btn: rgba(255, 255, 255, 0.9);
+  --error: #ff5252;
+  --warning: #856404;
+  
+  /* Legacy compatibility */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+  
+  /* Color scheme */
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ffffff;
-    --foreground: #ededed;
-  }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif, montserrat;
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  overflow-x: clip;
+  
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+a {
+  font-weight: 500;
+  color: var(--accent-link);
+  text-decoration: inherit;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: var(--accent-link-hover);
+}
+
+button {
+  font-family: inherit;
 }

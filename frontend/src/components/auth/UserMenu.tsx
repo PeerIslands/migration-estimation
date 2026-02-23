@@ -26,18 +26,15 @@ export default function UserMenu() {
   if (!user) return null;
 
   const handleLogout = () => {
+    sessionStorage.removeItem("admin_access_allowed");
     logout();
     setIsOpen(false);
   };
 
   const handleAdminDashboard = () => {
     setIsOpen(false);
+    sessionStorage.setItem("admin_access_allowed", "true");
     router.push("/admin");
-  };
-
-  const handleMyEstimations = () => {
-    setIsOpen(false);
-    router.push("/estimations");
   };
 
   // Get first letter of username for avatar
@@ -57,9 +54,6 @@ export default function UserMenu() {
 
       {isOpen && (
         <div className={styles.dropdown}>
-          <button className={styles.dropdownItem} onClick={handleMyEstimations}>
-            📊 My Estimations
-          </button>
           {user.role === "admin" && (
             <button className={styles.dropdownItem} onClick={handleAdminDashboard}>
               ⚙️ Admin Dashboard

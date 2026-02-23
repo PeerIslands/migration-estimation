@@ -28,6 +28,118 @@
   margin: 0;
 }
 
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notificationButton {
+  position: relative;
+  padding: 12px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+
+.notificationButton:hover {
+  border-color: #667eea;
+  background: #f5f5f7;
+  transform: scale(1.05);
+}
+
+.bellIcon {
+  font-size: 24px;
+  line-height: 1;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.notificationButton:hover .bellIcon {
+  filter: grayscale(0%);
+  opacity: 1;
+  animation: ring 0.5s ease-in-out;
+}
+
+.inboxIcon {
+  font-size: 24px;
+  line-height: 1;
+  filter: grayscale(100%);
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.notificationButton:hover .inboxIcon {
+  filter: grayscale(0%);
+  opacity: 1;
+  animation: bounce 0.5s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes ring {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(-10deg); }
+  20%, 40% { transform: rotate(10deg); }
+}
+
+.notificationDot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #dc3545;
+  color: white;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.archiveButton {
+  padding: 10px 16px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.archiveButton:hover {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.05);
+  color: #ff9800;
+  transform: translateY(-1px);
+}
+
+.archiveIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
 .backButton {
   padding: 10px 20px;
   background: white;
@@ -257,6 +369,11 @@
     gap: 16px;
   }
 
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .title {
     font-size: 24px;
   }
@@ -294,3 +411,4 @@
     gap: 8px;
   }
 }
+

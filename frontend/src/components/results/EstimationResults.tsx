@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import type { MigrationEstimateResponse } from "@/components/utils/types";
 import { useAuthStore } from "@/store/authStore";
 import styles from "./EstimationResults.module.css";
@@ -8,13 +8,18 @@ import styles from "./EstimationResults.module.css";
 type EstimationResultsProps = {
   estimation: MigrationEstimateResponse;
   onReset: () => void;
+  onEnquirySubmit?: (enquiry: string) => void;
 };
 
 export default function EstimationResults({
   estimation,
   onReset,
+  onEnquirySubmit,
 }: EstimationResultsProps) {
   const { isAuthenticated } = useAuthStore();
+  const [enquiry, setEnquiry] = useState("");
+  const [enquirySubmitted, setEnquirySubmitted] = useState(false);
+  const [requestQuote, setRequestQuote] = useState(false);
   const {
     per_environment_estimates,
     shared_activities,
@@ -64,6 +69,80 @@ export default function EstimationResults({
           </div>
         </div>
       </div>
+
+      {/* Request Quote Section */}
+      {!enquirySubmitted && (
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Request a Quote</h2>
+          <div className={styles.enquiryCard}>
+            <div className={styles.checkboxContainer}>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={requestQuote}
+                  onChange={(e) => setRequestQuote(e.target.checked)}
+                />
+                <span className={styles.checkboxText}>
+                  I would like to request a detailed quote for this migration
+                </span>
+              </label>
+            </div>
+            
+            {requestQuote && (
+              <div className={styles.enquiryFormContainer}>
+                <p className={styles.enquiryDescription}>
+                  Please share any questions or specific requirements you have about this estimation, and our team will get back to you with a detailed quote.
+                </p>
+                <textarea
+                  className={styles.enquiryTextarea}
+                  placeholder="Enter your questions, requirements, or any additional details..."
+                  value={enquiry}
+                  onChange={(e) => setEnquiry(e.target.value)}
+                  rows={5}
+                />
+                <div className={styles.enquiryActions}>
+                  <button
+                    type="button"
+                    className={styles.skipButton}
+                    onClick={() => {
+                      setEnquirySubmitted(true);
+                      setRequestQuote(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.submitEnquiryButton}
+                    onClick={() => {
+                      if (enquiry.trim() && onEnquirySubmit) {
+                        onEnquirySubmit(enquiry);
+                        setEnquirySubmitted(true);
+                      }
+                    }}
+                    disabled={!enquiry.trim()}
+                  >
+                    Submit Request
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {enquirySubmitted && enquiry && (
+        <section className={styles.section}>
+          <div className={styles.enquirySuccessCard}>
+            <div className={styles.successIcon}>✓</div>
+            <h3 className={styles.successTitle}>Quote Request Submitted Successfully!</h3>
+            <p className={styles.successMessage}>
+              Thank you for your request. Our team will review it and get back to you with a detailed quote soon.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Per-Environment Estimates */}
       <section className={styles.section}>

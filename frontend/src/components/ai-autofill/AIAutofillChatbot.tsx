@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import styles from "./AIAutofillChatbot.module.css";
 import CosmosDBExtractor from "./CosmosDBExtractor";
 
-type AutofillOption = "document" | "cosmosdb" | "manual" | null;
+type AutofillOption = "document" | "cosmosdb" | "script" | "manual" | null;
 
 interface AIAutofillChatbotProps {
   onDataExtracted: (data: any) => void;
@@ -20,6 +20,9 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
 
   // Document upload state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  // Script output upload state
+  const [scriptOutputFile, setScriptOutputFile] = useState<File | null>(null);
 
   // Manual prompt state
   const [manualPrompt, setManualPrompt] = useState("");
@@ -119,13 +122,81 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
     }
   };
 
+  const handleDownloadScript = () => {
+    // Download the Python script
+    const scriptUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_V1_PREFIX}/ai-autofill/download-script`;
+    const link = document.createElement('a');
+    link.href = scriptUrl;
+    link.download = 'extract_cosmosdb_metadata.py';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setSuccess("Script downloaded! Run it with your CosmosDB connection string and upload the output JSON file.");
+  };
+
+  const handleScriptOutputSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (!file.name.endsWith('.json')) {
+        setError("Please upload a JSON file");
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        setError("File size must be less than 10MB");
+        return;
+      }
+      setScriptOutputFile(file);
+      setError(null);
+    }
+  };
+
+  const handleScriptOutputUpload = async () => {
+    if (!scriptOutputFile) {
+      setError("Please select the JSON output file from the script");
+      return;
+    }
+
+    setIsProcessing(true);
+    setError(null);
+    setSuccess(null);
+
+    const formData = new FormData();
+    formData.append("file", scriptOutputFile);
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}${process.env.NEXT_PUBLIC_API_V1_PREFIX}/ai-autofill/upload-script-output`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to process script output");
+      }
+
+      const result = await response.json();
+      setSuccess(result.message);
+      
+      setTimeout(() => {
+        onDataExtracted(result.data);
+      }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to process script output");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className={`${styles.sidebar} ${isCollapsed ? styles.collapsed : ''}`}>
       <div className={styles.chatbot}>
         <div className={styles.header}>
           <h2>AI Assistant</h2>
           <button onClick={onToggleCollapse} className={styles.toggleButton} title={isCollapsed ? "Expand" : "Collapse"}>
-            {isCollapsed ? '←' : '→'}
+            {isCollapsed ? '→' : '←'}
           </button>
         </div>
 
@@ -153,6 +224,13 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
                   onClick={() => setSelectedOption("cosmosdb")}
                 >
                   Connect to CosmosDB
+                </button>
+
+                <button
+                  className={styles.optionButton}
+                  onClick={() => setSelectedOption("script")}
+                >
+                  Download & Run Script (No Connection String)
                 </button>
 
                 <button
@@ -220,6 +298,78 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
                       setSuccess(null);
                     }}
                   />
+                )}
+
+                {selectedOption === "script" && (
+                  <div className={styles.formSection}>
+                    <h3>Download & Run Script</h3>
+                    <p>Download our data collection script, run it locally, then upload the results.</p>
+
+                    <div className={styles.scriptSteps}>
+                      <div className={styles.scriptStep}>
+                        <div className={styles.stepNumber}>1</div>
+                        <div className={styles.stepContent}>
+                          <h4>Download Script</h4>
+                          <p>Download the Python script that will collect metadata from your CosmosDB</p>
+                          <button
+                            onClick={handleDownloadScript}
+                            className={styles.downloadButton}
+                          >
+                            📥 Download Script
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className={styles.scriptStep}>
+                        <div className={styles.stepNumber}>2</div>
+                        <div className={styles.stepContent}>
+                          <h4>Run Script Locally</h4>
+                          <p>Run the script with your CosmosDB connection string:</p>
+                          <code className={styles.codeBlock}>
+                            python extract_cosmosdb_metadata.py "your-connection-string"
+                          </code>
+                          <p className={styles.note}>This will generate a JSON file with your database metadata</p>
+                        </div>
+                      </div>
+
+                      <div className={styles.scriptStep}>
+                        <div className={styles.stepNumber}>3</div>
+                        <div className={styles.stepContent}>
+                          <h4>Upload Results</h4>
+                          <p>Upload the generated JSON file</p>
+                          
+                          <div className={styles.fileUpload}>
+                            <input
+                              type="file"
+                              accept=".json"
+                              onChange={handleScriptOutputSelect}
+                              id="script-output-upload"
+                              className={styles.fileInput}
+                            />
+                            <label htmlFor="script-output-upload" className={styles.fileLabel}>
+                              {scriptOutputFile ? scriptOutputFile.name : "Choose JSON file"}
+                            </label>
+                          </div>
+
+                          {scriptOutputFile && (
+                            <div className={styles.fileInfo}>
+                              <p>
+                                {scriptOutputFile.name} ({(scriptOutputFile.size / 1024).toFixed(2)} KB)
+                              </p>
+                            </div>
+                          )}
+
+                          <button
+                            onClick={handleScriptOutputUpload}
+                            disabled={!scriptOutputFile || isProcessing}
+                            className={styles.submitButton}
+                          >
+                            {isProcessing ? "Processing..." : "Upload & Process"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
                 {selectedOption === "manual" && (
