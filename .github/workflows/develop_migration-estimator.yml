@@ -54,4 +54,3 @@ jobs:
           app-name: 'migration-estimator'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_E46AECF1B9CB48868E0C850678128A70 }}
-          startup-command: 'uvicorn app.main:app --host 0.0.0.0 --port 8000'
