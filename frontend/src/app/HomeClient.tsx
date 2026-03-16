@@ -434,7 +434,7 @@ export default function HomeClient() {
           onStartDetailedEstimate={() => {
             // If not authenticated and no user info, show form
             if (!isAuthenticated && !userInfo) {
-              setPendingMode({ mode: "detailed" });
+              setPendingMode("detailed");
               setShowUserInfoForm(true);
             } else {
               setEstimationMode("detailed");
