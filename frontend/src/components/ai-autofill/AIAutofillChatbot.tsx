@@ -309,6 +309,18 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
                       <div className={styles.scriptStep}>
                         <div className={styles.stepNumber}>1</div>
                         <div className={styles.stepContent}>
+                          <h4>Install dependency</h4>
+                          <p>In a terminal, install the required Python package (run once):</p>
+                          <code className={styles.codeBlock}>
+                            pip install pymongo
+                          </code>
+                          <p className={styles.note}>Use pip3 on macOS/Linux if needed</p>
+                        </div>
+                      </div>
+
+                      <div className={styles.scriptStep}>
+                        <div className={styles.stepNumber}>2</div>
+                        <div className={styles.stepContent}>
                           <h4>Download Script</h4>
                           <p>Download the Python script that will collect metadata from your CosmosDB</p>
                           <button
@@ -321,7 +333,7 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
                       </div>
 
                       <div className={styles.scriptStep}>
-                        <div className={styles.stepNumber}>2</div>
+                        <div className={styles.stepNumber}>3</div>
                         <div className={styles.stepContent}>
                           <h4>Run Script Locally</h4>
                           <p>Run the script with your CosmosDB connection string:</p>
@@ -333,7 +345,7 @@ export default function AIAutofillChatbot({ onDataExtracted, isCollapsed, onTogg
                       </div>
 
                       <div className={styles.scriptStep}>
-                        <div className={styles.stepNumber}>3</div>
+                        <div className={styles.stepNumber}>4</div>
                         <div className={styles.stepContent}>
                           <h4>Upload Results</h4>
                           <p>Upload the generated JSON file</p>

@@ -4,6 +4,21 @@
   position: relative;
 }
 
+/* Wrapper to center the success modal after detailed estimation */
+.successModalWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 70vh;
+  padding: 24px;
+}
+
+.containerSuccessCentered {
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
 .container {
   width: 100%;
   max-width: 760px;

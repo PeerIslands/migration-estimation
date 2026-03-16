@@ -156,6 +156,35 @@ export function countAnsweredQuestions(sections: Section[], answers: AnswersStat
   return count;
 }
 
+/** Count only questions marked as required. */
+export function countRequiredQuestions(sections: Section[]): number {
+  let count = 0;
+  for (const section of sections) {
+    for (const q of getSectionQuestions(section)) {
+      if (q.required) count += 1;
+    }
+  }
+  return count;
+}
+
+/** Count how many required questions have been answered. */
+export function countAnsweredRequiredQuestions(sections: Section[], answers: AnswersState): number {
+  let count = 0;
+  for (const section of sections) {
+    for (const q of getSectionQuestions(section)) {
+      if (!q.required) continue;
+      const v = answers[q.answerKey];
+      const isAnswered =
+        v !== undefined &&
+        v !== null &&
+        (typeof v !== "string" || v.trim() !== "") &&
+        (!Array.isArray(v) || v.length > 0);
+      if (isAnswered) count += 1;
+    }
+  }
+  return count;
+}
+
 export const PER_ENV_TABS_SECTION_ID_EXPORT = PER_ENV_TABS_SECTION_ID;
 
 

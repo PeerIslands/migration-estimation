@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./index.module.css";
 import {
   type FormConfig,
@@ -11,8 +11,8 @@ import {
 import { validateAnswer } from "@/components/utils/validation";
 import {
   buildEffectiveSections,
-  countAnsweredQuestions,
-  countTotalQuestions,
+  countAnsweredRequiredQuestions,
+  countRequiredQuestions,
   shuffleArray,
   PER_ENV_TABS_SECTION_ID_EXPORT as PER_ENV_TABS_SECTION_ID,
 } from "@/components/utils/helpers";
@@ -32,9 +32,12 @@ type FormRendererProps = {
   };
   clientName?: string;
   quickEstimationId?: string | null;
+  requireUserInfo?: boolean;
+  onNeedUserInfo?: () => void;
+  triggerSubmit?: boolean;
 };
 
-export default function FormRenderer({ config, userInfo, clientName, quickEstimationId }: FormRendererProps) {
+export default function FormRenderer({ config, userInfo, clientName, quickEstimationId, requireUserInfo, onNeedUserInfo, triggerSubmit }: FormRendererProps) {
   const { formId, title, description, sections: rawSections, settings } = config;
 
   // Track an active form id that can be incremented after submit
@@ -70,6 +73,8 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
   const [isChatbotCollapsed, setIsChatbotCollapsed] = useState(false);
   const [savedEstimationId, setSavedEstimationId] = useState<string | null>(null);
 
+  const autoSubmitFiredRef = useRef(false);
+
   const numEnvironments = Number(answers.number_of_environments) || 0;
 
   // Warn user before leaving/refreshing page if form is in progress
@@ -94,6 +99,15 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [answers, submitted]);
+
+  // Auto-submit after user info is collected for logged-out detailed flow
+  useEffect(() => {
+    if (triggerSubmit && !autoSubmitFiredRef.current && !submitted && !isSubmitting) {
+      autoSubmitFiredRef.current = true;
+      handleSubmit();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerSubmit]);
 
   const handleEnquirySubmit = async (enquiry: string) => {
     if (!savedEstimationId) {
@@ -152,9 +166,9 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFormId, rawSections, shuffleQuestions]);
 
-  const totalQuestions = useMemo(() => countTotalQuestions(sections), [sections]);
-  const answeredCount = useMemo(() => countAnsweredQuestions(sections, answers), [sections, answers]);
-  const progressPercent = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
+  const requiredTotal = useMemo(() => countRequiredQuestions(sections), [sections]);
+  const requiredAnswered = useMemo(() => countAnsweredRequiredQuestions(sections, answers), [sections, answers]);
+  const progressPercent = requiredTotal > 0 ? Math.round((requiredAnswered / requiredTotal) * 100) : 0;
 
   function handleInputChange(question: Question, value: AnswerValue) {
     setAnswer(question.answerKey, value as any);
@@ -245,6 +259,12 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
   const { isAuthenticated } = useAuthStore();
 
   async function handleSubmit() {
+    // For logged-out users who haven't provided contact info yet, collect it first
+    if (requireUserInfo && onNeedUserInfo) {
+      onNeedUserInfo();
+      return;
+    }
+
     // validate all sections before submit (including all environment tabs)
     let valid = true;
     for (const section of sections) {
@@ -641,7 +661,8 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
   if (submitted && estimationResult) {
     // For detailed estimations, show quote request confirmation instead of full results
     return (
-      <div className={styles.container}>
+      <div className={styles.successModalWrapper}>
+        <div className={`${styles.container} ${styles.containerSuccessCentered}`}>
         <div className={styles.quoteRequestSuccess}>
           <div className={styles.successIcon}>✓</div>
           <h2 className={styles.successTitle}>Quote Request Submitted Successfully!</h2>
@@ -656,6 +677,7 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
               Submit Another Request
             </button>
           </div>
+        </div>
         </div>
       </div>
     );
@@ -693,7 +715,7 @@ export default function FormRenderer({ config, userInfo, clientName, quickEstima
           <div className={styles.progressTrack}>
             <div className={styles.progressBar} style={{ width: `${progressPercent}%` }} />
           </div>
-          <div className={styles.progressText}>{answeredCount} / {totalQuestions} answered</div>
+          <div className={styles.progressText}>{requiredAnswered} / {requiredTotal} required</div>
         </div>
       ) : null}
 

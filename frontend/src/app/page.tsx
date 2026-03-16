@@ -1,6 +1,6 @@
 import React from "react";
-import HomeClient from "./HomeClient";
+import MigrationTypeWrapper from "@/components/migration-wrapper/MigrationTypeWrapper";
 
 export default function Home() {
-  return <HomeClient />;
+  return <MigrationTypeWrapper />;
 }

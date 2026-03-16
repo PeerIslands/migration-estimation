@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/authStore";
 import { useFormStore } from "@/components/store/formStore";
 import FormRenderer from "@/components/main/index";
@@ -39,6 +40,7 @@ interface QuickEstimate {
 }
 
 export default function HomeClient() {
+  const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [estimationMode, setEstimationMode] = useState<EstimationMode>(null);
@@ -48,6 +50,8 @@ export default function HomeClient() {
   const [showUserInfoForm, setShowUserInfoForm] = useState(false);
   const [showTierSelector, setShowTierSelector] = useState(false);
   const [pendingMode, setPendingMode] = useState<"quick" | "detailed" | null>(null);
+  const [pendingDataSize, setPendingDataSize] = useState<DataSize | null>(null);
+  const [pendingDetailedSubmit, setPendingDetailedSubmit] = useState(false);
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [clientName, setClientName] = useState<string>("");
   const [showClientNameError, setShowClientNameError] = useState(false);
@@ -214,38 +218,51 @@ export default function HomeClient() {
   };
 
   const handleModeSelected = (mode: "quick" | "detailed") => {
-    // Validate client name first
     if (!clientName.trim()) {
       setShowClientNameError(true);
       return;
     }
-    
     setShowClientNameError(false);
-    
-    // Always show user info form first (unless already authenticated)
-    if (!isAuthenticated) {
-      setPendingMode(mode);
-      setShowUserInfoForm(true);
+
+    // Proceed directly — UserInfoForm is collected later in the flow for logged-out users
+    if (mode === "quick") {
+      setShowTierSelector(true);
     } else {
-      // If authenticated, proceed based on mode
-      if (mode === "quick") {
-        setShowTierSelector(true);
-      } else {
-        setEstimationMode("detailed");
-      }
+      setEstimationMode("detailed");
     }
   };
 
-  const handleUserInfoSubmit = (info: UserInfo) => {
+  const handleUserInfoSubmit = async (info: UserInfo) => {
     setUserInfo(info);
     setShowUserInfoForm(false);
-    
+
     if (pendingMode === "quick") {
-      // Show tier selector for quick estimate
-      setShowTierSelector(true);
+      // Reveal quick estimate results and save to DB
+      setEstimationMode("quick");
+      setPendingMode(null);
+      const dataSize = pendingDataSize!;
+      setPendingDataSize(null);
+      const estimate = quickEstimate!;
+      try {
+        const timestamp = new Date().toLocaleString();
+        const savedEstimation = await saveEstimation({
+          name: `Quick Estimate - ${dataSize} - ${timestamp}`,
+          estimation_type: "quick",
+          quick_estimate_data: estimate,
+          client_name: clientName || undefined,
+          user_name: info.name,
+          user_email: info.email,
+          user_designation: info.designation,
+          user_company: info.company,
+        });
+        setQuickEstimationId(savedEstimation._id);
+      } catch (error) {
+        console.error("Failed to save quick estimation:", error);
+      }
     } else if (pendingMode === "detailed") {
-      // Go directly to detailed estimation
-      setEstimationMode("detailed");
+      // Trigger FormRenderer to auto-submit now that we have user info
+      setPendingMode(null);
+      setPendingDetailedSubmit(true);
     }
   };
 
@@ -257,32 +274,40 @@ export default function HomeClient() {
   const handleTierSelected = async (dataSize: DataSize) => {
     const estimate = generateQuickEstimate(dataSize);
     setQuickEstimate(estimate);
-    setEstimationMode("quick");
     setShowTierSelector(false);
-    
-    // Save quick estimate immediately and store the ID
-    try {
-      const timestamp = new Date().toLocaleString();
-      const savedEstimation = await saveEstimation({
-        name: `Quick Estimate - ${dataSize} - ${timestamp}`,
-        estimation_type: "quick",
-        quick_estimate_data: estimate,
-        client_name: clientName || undefined,
-        user_name: userInfo?.name,
-        user_email: userInfo?.email,
-        user_designation: userInfo?.designation,
-        user_company: userInfo?.company,
-      });
-      setQuickEstimationId(savedEstimation._id);
-      console.log("Quick estimation saved to database with ID:", savedEstimation._id);
-    } catch (error) {
-      console.error("Failed to save quick estimation:", error);
+
+    if (!isAuthenticated && !userInfo) {
+      // Collect user info before revealing results
+      setPendingDataSize(dataSize);
+      setPendingMode("quick");
+      setShowUserInfoForm(true);
+    } else {
+      // Authenticated or already has info — show results and save immediately
+      setEstimationMode("quick");
+      try {
+        const timestamp = new Date().toLocaleString();
+        const savedEstimation = await saveEstimation({
+          name: `Quick Estimate - ${dataSize} - ${timestamp}`,
+          estimation_type: "quick",
+          quick_estimate_data: estimate,
+          client_name: clientName || undefined,
+          user_name: userInfo?.name,
+          user_email: userInfo?.email,
+          user_designation: userInfo?.designation,
+          user_company: userInfo?.company,
+        });
+        setQuickEstimationId(savedEstimation._id);
+        console.log("Quick estimation saved to database with ID:", savedEstimation._id);
+      } catch (error) {
+        console.error("Failed to save quick estimation:", error);
+      }
     }
   };
 
   const handleTierCancel = () => {
     setShowTierSelector(false);
     setPendingMode(null);
+    setPendingDataSize(null);
     setUserInfo(null);
     setQuickEstimationId(null);
   };
@@ -293,6 +318,8 @@ export default function HomeClient() {
     setQuickEstimationId(null);
     setUserInfo(null);
     setPendingMode(null);
+    setPendingDataSize(null);
+    setPendingDetailedSubmit(false);
     setShowTierSelector(false);
     setClientName("");
   };
@@ -413,7 +440,10 @@ export default function HomeClient() {
               setEstimationMode("detailed");
             }
           }}
-          onReset={handleResetEstimation}
+          onReset={() => {
+            handleResetEstimation();
+            router.push("/");
+          }}
           userInfo={getUserInfoForSaving()}
         />
       </div>
@@ -439,6 +469,7 @@ export default function HomeClient() {
               }
             }
             handleResetEstimation();
+            router.push("/");
           }}
           className={styles.backToHomeButton}
         >
@@ -458,7 +489,18 @@ export default function HomeClient() {
 
       {/* Main Content */}
       <div className={styles.mainContainer}>
-        <FormRenderer config={config} userInfo={getUserInfoForSaving()} clientName={clientName} quickEstimationId={quickEstimationId} />
+        <FormRenderer
+          config={config}
+          userInfo={getUserInfoForSaving()}
+          clientName={clientName}
+          quickEstimationId={quickEstimationId}
+          requireUserInfo={!isAuthenticated && !userInfo}
+          onNeedUserInfo={() => {
+            setPendingMode("detailed");
+            setShowUserInfoForm(true);
+          }}
+          triggerSubmit={pendingDetailedSubmit}
+        />
       </div>
     </div>
   );

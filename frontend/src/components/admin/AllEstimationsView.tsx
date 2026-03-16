@@ -37,7 +37,7 @@ export default function AllEstimationsView() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterEstimationType, setFilterEstimationType] = useState<string>("all");
   const [filterEnquiryStatus, setFilterEnquiryStatus] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [fullEstimations, setFullEstimations] = useState<Map<string, any>>(new Map());
   const [loadingFullEstimations, setLoadingFullEstimations] = useState<Set<string>>(new Set());
@@ -343,9 +343,9 @@ export default function AllEstimationsView() {
         </div>
       </div>
 
-      {/* Filters - Only show in list view */}
-      {viewMode === "list" && (
-        <div className={styles.filters}>
+      {/* Filters - search only in list view; filter dropdowns in both views */}
+      <div className={styles.filters}>
+        {viewMode === "list" && (
           <input
             type="text"
             placeholder="Search by name, email, company..."
@@ -353,43 +353,43 @@ export default function AllEstimationsView() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className={styles.searchInput}
           />
-          <select
-            value={filterEstimationType}
-            onChange={(e) => setFilterEstimationType(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Types</option>
-            <option value="quick">Quick Estimates</option>
-            <option value="detailed">Detailed Estimates</option>
-          </select>
-          <select
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Migration Types</option>
-            {uniqueMigrationTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-          <select
-            value={filterEnquiryStatus}
-            onChange={(e) => setFilterEnquiryStatus(e.target.value)}
-            className={styles.filterSelect}
-          >
-            <option value="all">All Enquiry Status</option>
-            <option value="with_enquiry">With Enquiry</option>
-            <option value="without_enquiry">Without Enquiry</option>
-          </select>
-        </div>
-      )}
+        )}
+        <select
+          value={filterEstimationType}
+          onChange={(e) => setFilterEstimationType(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">All Types</option>
+          <option value="quick">Quick Estimates</option>
+          <option value="detailed">Detailed Estimates</option>
+        </select>
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">All Migration Types</option>
+          {uniqueMigrationTypes.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
+        </select>
+        <select
+          value={filterEnquiryStatus}
+          onChange={(e) => setFilterEnquiryStatus(e.target.value)}
+          className={styles.filterSelect}
+        >
+          <option value="all">All Enquiry Status</option>
+          <option value="with_enquiry">With Enquiry</option>
+          <option value="without_enquiry">Without Enquiry</option>
+        </select>
+      </div>
 
       {/* Kanban View */}
       {viewMode === "kanban" ? (
         <KanbanView 
-          estimations={estimations} 
+          estimations={filteredEstimations} 
           onStatusUpdate={() => {
             console.log("Refreshing estimations after status update");
             loadEstimations();

@@ -6,7 +6,7 @@ common_reference:
 tiers:
   simple:
     name: Simple Complexity
-    description: Straightforward migration with up to 250GB data
+    description: Straight-forward migration with up to 250GB data
     complexity: Simple
     data_range: Up to 250GB
     collections_range: Up to 50 collections

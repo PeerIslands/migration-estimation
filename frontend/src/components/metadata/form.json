@@ -33,7 +33,7 @@
       "questions": [
         {
           "questionId": "sec1-q1",
-          "scope": "common",
+          "scope": "perEnv",
           "questionType": "mcq",
           "label": "CosmosDB API (Mongo / SQL / NoSQL)",
           "answerKey": "source_api",
@@ -53,11 +53,12 @@
           "label": "API Version (Mongo API: 3.6, 4.0, 5.0, etc.)",
           "placeholder": "e.g., 5.0",
           "answerKey": "api_version",
-          "validation": { "type": "string" }
+          "validation": { "type": "string" },
+          "required": true
         },
         {
           "questionId": "sec1-q3",
-          "scope": "perEnv",
+          "scope": "common",
           "questionType": "number",
           "label": "Number of Accounts",
           "placeholder": "0",
@@ -73,7 +74,8 @@
           "placeholder": "0",
           "answerKey": "number_of_databases",
           "min": 0,
-          "validation": { "type": "number" }
+          "validation": { "type": "number" },
+          "required": true
         },
         {
           "questionId": "sec1-q5",
@@ -83,7 +85,8 @@
           "placeholder": "0",
           "answerKey": "number_of_collections",
           "min": 0,
-          "validation": { "type": "number" }
+          "validation": { "type": "number" },
+          "required": true
         },
         {
           "questionId": "sec1-q6",
@@ -93,7 +96,8 @@
           "placeholder": "e.g. 50",
           "answerKey": "total_data_gb",
           "min": 0,
-          "validation": { "type": "number" }
+          "validation": { "type": "number" },
+          "required": true
         },
         {
           "questionId": "sec1-q7",
@@ -111,7 +115,7 @@
         },
         {
           "questionId": "sec1-q8",
-          "scope": "perEnv",
+          "scope": "common",
           "questionType": "mcq",
           "label": "Current RU configuration (Single RU or Shared RU)",
           "answerKey": "ru_configuration",
@@ -124,7 +128,7 @@
         },
         {
           "questionId": "sec1-q9",
-          "scope": "perEnv",
+          "scope": "common",
           "questionType": "textarea",
           "label": "Read & Write Transactions Per Second (TPS)",
           "placeholder": "Read: 100 TPS, Write: 50 TPS",
@@ -137,119 +141,6 @@
     {
       "sectionId": "app_connectivity_details",
       "title": "Application & Connectivity Details",
-      "questions": [
-        {
-          "questionId": "sec2-q10",
-          "scope": "common",
-          "questionType": "text",
-          "label": "Programming Language (Java, .Net, C, C++, etc.) and Driver Version Used",
-          "placeholder": "e.g., Java 17, Mongo Driver 4.10",
-          "answerKey": "programming_lang_driver_version",
-          "validation": { "type": "string" }
-        },
-        {
-          "questionId": "sec2-q11",
-          "scope": "perEnv",
-          "questionType": "number",
-          "label": "How many consumer applications are connected to the database?",
-          "placeholder": "0",
-          "answerKey": "num_consumer_apps",
-          "min": 0,
-          "validation": { "type": "number" }
-        },
-        {
-          "questionId": "sec2-q12",
-          "scope": "perEnv",
-          "questionType": "mcq",
-          "label": "Does your application perform delete transactions?",
-          "answerKey": "performs_deletes",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        },
-        {
-          "questionId": "sec2-q13",
-          "scope": "perEnv",
-          "questionType": "mcq",
-          "label": "Should deletes be captured in the change stream? (Hard Deletes)",
-          "answerKey": "hard_deletes",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        },
-        {
-          "questionId": "sec2-q14",
-          "scope": "perEnv",
-          "questionType": "mcq",
-          "label": "Is Change Stream required?",
-          "answerKey": "change_stream_required",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        },
-        {
-          "questionId": "sec2-q15",
-          "scope": "perEnv",
-          "questionType": "mcq",
-          "label": "Is Reverse Sync required?",
-          "answerKey": "reverse_sync",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        },
-        {
-          "questionId": "sec2-q16",
-          "scope": "perEnv",
-          "questionType": "mcq",
-          "label": "Is Application/API refactoring required?",
-          "answerKey": "app_refactoring_required",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        },
-        {
-          "questionId": "sec2-q16b",
-          "scope": "perEnv",
-          "questionType": "textarea",
-          "label": "If yes, please elaborate on refactoring requirements",
-          "placeholder": "Describe refactoring requirements...",
-          "answerKey": "app_refactoring_details",
-          "validation": { "type": "string" },
-          "uiProps": { "rows": 3 }
-        },
-        {
-          "questionId": "sec2-q17",
-          "scope": "common",
-          "questionType": "mcq",
-          "label": "Any Private VPN/VPC setup required?",
-          "answerKey": "vpn_vpc_required",
-          "options": [
-            { "value": "yes", "label": "Yes" },
-            { "value": "no", "label": "No" }
-          ],
-          "validation": { "type": "string" },
-          "uiProps": { "orientation": "horizontal" }
-        }
-      ]
-    },
-    {
-      "sectionId": "target_env_migration",
-      "title": "Target Environment & Migration Preferences",
       "questions": [
         {
           "questionId": "sec3-q18",
@@ -266,16 +157,123 @@
           "uiProps": { "orientation": "horizontal" }
         },
         {
-          "questionId": "sec3-q19",
-          "scope": "perEnv",
+          "questionId": "sec2-q11",
+          "scope": "common",
+          "questionType": "number",
+          "label": "How many consumer applications are connected to the database?",
+          "placeholder": "0",
+          "answerKey": "num_consumer_apps",
+          "min": 0,
+          "validation": { "type": "number" }
+        },
+        {
+          "questionId": "sec2-q16",
+          "scope": "common",
+          "questionType": "mcq",
+          "label": "Is Application/API refactoring required?",
+          "answerKey": "app_refactoring_required",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" }
+        },
+        {
+          "questionId": "sec2-q16b",
+          "scope": "common",
+          "questionType": "textarea",
+          "label": "If yes, please elaborate on refactoring requirements",
+          "placeholder": "Describe refactoring requirements...",
+          "answerKey": "app_refactoring_details",
+          "validation": { "type": "string" },
+          "uiProps": { "rows": 3 }
+        },
+        {
+          "questionId": "sec2-q10",
+          "scope": "common",
           "questionType": "text",
-          "label": "Preferred maintenance window for operations",
-          "placeholder": "e.g., Weekends 2 AM - 6 AM",
-          "answerKey": "maintenance_window",
+          "label": "Programming Language (Java, .Net, C, C++, etc.) and Driver Version Used",
+          "placeholder": "e.g., Java 17, Mongo Driver 4.10",
+          "answerKey": "programming_lang_driver_version",
           "validation": { "type": "string" }
+        },
+        
+        {
+          "questionId": "sec2-q14",
+          "scope": "perEnv",
+          "questionType": "mcq",
+          "label": "Is Change Stream required?",
+          "answerKey": "change_stream_required",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" },
+          "required": true
+        },
+        {
+          "questionId": "sec2-q15",
+          "scope": "perEnv",
+          "questionType": "mcq",
+          "label": "Is Reverse Sync required?",
+          "answerKey": "reverse_sync",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" },
+          "required": true
+        },
+        {
+          "questionId": "sec2-q12",
+          "scope": "perEnv",
+          "questionType": "mcq",
+          "label": "Does your application perform delete transactions?",
+          "answerKey": "performs_deletes",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" },
+          "required": true
+        },
+        {
+          "questionId": "sec2-q13",
+          "scope": "perEnv",
+          "questionType": "mcq",
+          "label": "Should deletes be captured in the change stream? (Hard Deletes)",
+          "answerKey": "hard_deletes",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" },
+          "required": true
+        },
+        
+        
+        
+        {
+          "questionId": "sec2-q17",
+          "scope": "common",
+          "questionType": "mcq",
+          "label": "Any Private VPN/VPC setup required?",
+          "answerKey": "vpn_vpc_required",
+          "options": [
+            { "value": "yes", "label": "Yes" },
+            { "value": "no", "label": "No" }
+          ],
+          "validation": { "type": "string" },
+          "uiProps": { "orientation": "horizontal" }
         }
       ]
     },
+    
     {
       "sectionId": "data_transformation_validation",
       "title": "Data Transformation & Validation",
@@ -302,6 +300,22 @@
           "answerKey": "data_transformation_details",
           "validation": { "type": "string" },
           "uiProps": { "rows": 3 }
+        }
+      ]
+    },
+    {
+      "sectionId": "target_env_migration",
+      "title": "Target Environment & Migration Preferences",
+      "questions": [
+        
+        {
+          "questionId": "sec3-q19",
+          "scope": "common",
+          "questionType": "text",
+          "label": "Preferred maintenance window for operations",
+          "placeholder": "e.g., Weekends 2 AM - 6 AM",
+          "answerKey": "maintenance_window",
+          "validation": { "type": "string" }
         }
       ]
     }

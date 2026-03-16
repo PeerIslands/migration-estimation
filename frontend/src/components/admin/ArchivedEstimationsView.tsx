@@ -37,7 +37,7 @@ export default function ArchivedEstimationsView() {
   const [filterType, setFilterType] = useState<string>("all");
   const [filterEstimationType, setFilterEstimationType] = useState<string>("all");
   const [filterEnquiryStatus, setFilterEnquiryStatus] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("kanban");
   const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
   const [showUnarchiveModal, setShowUnarchiveModal] = useState(false);
   const [estimationToUnarchive, setEstimationToUnarchive] = useState<Estimation | null>(null);

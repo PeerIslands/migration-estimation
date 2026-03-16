@@ -11,6 +11,27 @@ interface TierSelectorProps {
   onCancel: () => void;
 }
 
+const tierMeta: Record<DataSize, { icon: string; accentClass: string; dataRange: string; complexity: number }> = {
+  simple: {
+    icon: "📦",
+    accentClass: styles.tierCardSimple,
+    dataRange: "Up to 250 GB",
+    complexity: 1,
+  },
+  medium: {
+    icon: "🗄️",
+    accentClass: styles.tierCardMedium,
+    dataRange: "Up to 2 TB",
+    complexity: 2,
+  },
+  complex: {
+    icon: "🏗️",
+    accentClass: styles.tierCardComplex,
+    dataRange: "2 TB+",
+    complexity: 3,
+  },
+};
+
 export default function TierSelector({ onTierSelected, onCancel }: TierSelectorProps) {
   const [tierData, setTierData] = useState<any>(null);
 
@@ -30,17 +51,16 @@ export default function TierSelector({ onTierSelected, onCancel }: TierSelectorP
     if (tierData?.tiers) {
       return Object.entries(tierData.tiers).map(([size, tier]: [string, any]) => ({
         size: size as DataSize,
-        title: size.charAt(0).toUpperCase() + size.slice(1), // "simple" -> "Simple"
+        title: size.charAt(0).toUpperCase() + size.slice(1),
         description: tier.description,
       }));
     }
 
-    // Fallback defaults (should rarely be used as API loads first)
     return [
       {
         size: "simple" as DataSize,
         title: "Simple",
-        description: "Straightforward migration with up to 250GB data",
+        description: "Straight-forward migration with up to 250GB data",
       },
       {
         size: "medium" as DataSize,
@@ -73,23 +93,42 @@ export default function TierSelector({ onTierSelected, onCancel }: TierSelectorP
         </p>
 
         <div className={styles.tierCards}>
-          {dataSizeTiers.map((tier) => (
-            <button
-              key={tier.size}
-              onClick={() => onTierSelected(tier.size)}
-              className={styles.tierCard}
-            >
-              <div className={styles.tierHeader}>
-                <h3 className={styles.tierTitle}>{tier.title}</h3>
-                <p className={styles.tierDescription}>{tier.description}</p>
-              </div>
-            </button>
-          ))}
+          {dataSizeTiers.map((tier) => {
+            const meta = tierMeta[tier.size];
+            return (
+              <button
+                key={tier.size}
+                onClick={() => onTierSelected(tier.size)}
+                className={`${styles.tierCard} ${meta.accentClass}`}
+              >
+                <div className={styles.tierIconWrapper}>
+                  <span className={styles.tierIcon}>{meta.icon}</span>
+                </div>
+                <div className={styles.tierHeader}>
+                  <h3 className={styles.tierTitle}>{tier.title}</h3>
+                  <span className={styles.tierDataRange}>{meta.dataRange}</span>
+                  <p className={styles.tierDescription}>{tier.description}</p>
+                </div>
+                <div className={styles.tierComplexity}>
+                  <span className={styles.complexityLabel}>Complexity</span>
+                  <div className={styles.complexityDots}>
+                    {[1, 2, 3].map((i) => (
+                      <span
+                        key={i}
+                        className={`${styles.complexityDot} ${i <= meta.complexity ? styles.complexityDotActive : ""}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <ul className={styles.tierBullets}>
+                  <li>Supports up to 50 collections across up to 10 databases</li>
+                  <li>Estimate is for up to 3 environments</li>
+                </ul>
+              </button>
+            );
+          })}
         </div>
 
-        <div className={styles.tierDisclaimer}>
-          <p>Note: Estimates are for up to 50 collections and 10 databases</p>
-        </div>
       </div>
     </div>
   );

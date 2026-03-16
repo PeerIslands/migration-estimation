@@ -249,7 +249,7 @@ export default function AdminDashboard() {
           <button
             onClick={() => {
               sessionStorage.removeItem("admin_access_allowed");
-              router.replace("/");
+              router.replace("/estimate");
             }}
             className={styles.backButton}
           >

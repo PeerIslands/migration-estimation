@@ -17,11 +17,33 @@
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
 }
 
+.heroHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.heroLogo {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 20px rgba(91, 108, 255, 0.5));
+  animation: floatLogo 3s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
 .title {
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
-  color: var(--text-primary, rgba(255, 255, 255, 0.87));
+  background: linear-gradient(135deg, #ffffff 0%, #a0aaff 50%, #00ed64 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.5rem;
 }
 
@@ -29,7 +51,7 @@
   font-size: 1.125rem;
   text-align: center;
   color: var(--text-muted, rgba(239, 237, 253, 0.7));
-  margin-bottom: 2rem;
+  margin-bottom: 0;
 }
 
 .clientNameBox {
@@ -115,9 +137,9 @@
 }
 
 .modeCard {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid var(--border-medium, rgba(255, 255, 255, 0.2));
-  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px solid var(--border-medium, rgba(255, 255, 255, 0.15));
+  border-radius: 16px;
   padding: 2rem;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -125,17 +147,48 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.modeCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+  background: var(--mode-accent, rgba(255, 255, 255, 0.2));
+}
+
+.modeCardQuick {
+  --mode-accent: #f59e0b;
+  --mode-glow: rgba(245, 158, 11, 0.25);
+  --mode-icon-bg: rgba(245, 158, 11, 0.12);
+  --mode-badge-bg: rgba(245, 158, 11, 0.15);
+  --mode-badge-color: #f59e0b;
+  --mode-feature-color: #f59e0b;
+}
+
+.modeCardDetailed {
+  --mode-accent: #5b6cff;
+  --mode-glow: rgba(91, 108, 255, 0.25);
+  --mode-icon-bg: rgba(91, 108, 255, 0.12);
+  --mode-badge-bg: rgba(91, 108, 255, 0.15);
+  --mode-badge-color: #7b8fff;
+  --mode-feature-color: #7b8fff;
 }
 
 .modeCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(91, 108, 255, 0.3);
-  border-color: var(--accent-primary, #5b6cff);
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 36px var(--mode-glow, rgba(91, 108, 255, 0.2));
+  border-color: var(--mode-accent, rgba(255, 255, 255, 0.4));
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .modeCardDisabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -143,41 +196,90 @@
 .modeCardDisabled:hover {
   transform: none;
   box-shadow: none;
-  border-color: var(--border-medium, rgba(255, 255, 255, 0.2));
-  background: rgba(255, 255, 255, 0.05);
+}
+
+.modeIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--mode-icon-bg, rgba(255, 255, 255, 0.08));
+  margin-bottom: 0.75rem;
 }
 
 .modeIcon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.modeBadge {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  background: var(--mode-badge-bg, rgba(255, 255, 255, 0.1));
+  color: var(--mode-badge-color, rgba(255, 255, 255, 0.7));
+  margin-bottom: 0.75rem;
 }
 
 .modeTitle {
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary, rgba(255, 255, 255, 0.87));
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .modeDescription {
-  font-size: 1rem;
-  color: var(--text-muted, rgba(239, 237, 253, 0.7));
+  font-size: 0.95rem;
+  color: var(--text-muted, rgba(239, 237, 253, 0.65));
   line-height: 1.6;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+}
+
+.modeDivider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.07);
+  margin: 1.25rem 0;
 }
 
 .modeFeatures {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
   align-items: flex-start;
   width: 100%;
 }
 
 .feature {
-  font-size: 0.9rem;
-  color: var(--accent-primary, #5b6cff);
+  font-size: 0.875rem;
+  color: var(--mode-feature-color, rgba(255, 255, 255, 0.6));
   font-weight: 500;
+  padding-left: 1.2rem;
+  position: relative;
+}
+
+.feature::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  font-weight: 700;
+  font-size: 0.8rem;
+}
+
+.modeArrow {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  color: var(--mode-accent, rgba(255, 255, 255, 0.3));
+  transition: transform 0.2s ease;
+}
+
+.modeCard:hover .modeArrow {
+  transform: translateX(4px);
 }
 
 .quickEstimateFlow {
@@ -237,25 +339,87 @@
 .tierCard {
   background: rgba(255, 255, 255, 0.03);
   border: 2px solid var(--border-medium, rgba(255, 255, 255, 0.2));
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
   position: relative;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.tierCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 16px 16px 0 0;
+  background: var(--tier-accent, rgba(255, 255, 255, 0.2));
+  transition: opacity 0.3s ease;
 }
 
 .tierCard:hover {
-  border-color: var(--accent-primary, #5b6cff);
-  box-shadow: 0 6px 20px rgba(91, 108, 255, 0.2);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px var(--tier-glow, rgba(91, 108, 255, 0.2));
+  border-color: var(--tier-accent, rgba(255, 255, 255, 0.4));
+  background: var(--tier-bg-hover, rgba(255, 255, 255, 0.06));
+}
+
+.tierCardSimple {
+  --tier-accent: #00ed64;
+  --tier-glow: rgba(0, 237, 100, 0.25);
+  --tier-bg-hover: rgba(0, 237, 100, 0.05);
+  --tier-icon-bg: rgba(0, 237, 100, 0.12);
+  --tier-dot-color: #00ed64;
+  --tier-badge-bg: rgba(0, 237, 100, 0.15);
+  --tier-badge-color: #00ed64;
+}
+
+.tierCardMedium {
+  --tier-accent: #5b6cff;
+  --tier-glow: rgba(91, 108, 255, 0.25);
+  --tier-bg-hover: rgba(91, 108, 255, 0.05);
+  --tier-icon-bg: rgba(91, 108, 255, 0.12);
+  --tier-dot-color: #5b6cff;
+  --tier-badge-bg: rgba(91, 108, 255, 0.15);
+  --tier-badge-color: #7b8fff;
+}
+
+.tierCardComplex {
+  --tier-accent: #f59e0b;
+  --tier-glow: rgba(245, 158, 11, 0.25);
+  --tier-bg-hover: rgba(245, 158, 11, 0.05);
+  --tier-icon-bg: rgba(245, 158, 11, 0.12);
+  --tier-dot-color: #f59e0b;
+  --tier-badge-bg: rgba(245, 158, 11, 0.15);
+  --tier-badge-color: #f59e0b;
 }
 
 .tierCardSelected {
-  border-color: var(--accent-primary, #5b6cff);
-  background: rgba(91, 108, 255, 0.15);
-  box-shadow: 0 6px 20px rgba(91, 108, 255, 0.3);
+  border-color: var(--tier-accent, #5b6cff);
+  background: var(--tier-bg-hover, rgba(91, 108, 255, 0.1));
+  box-shadow: 0 8px 24px var(--tier-glow, rgba(91, 108, 255, 0.3));
+}
+
+.tierIconWrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.tierIcon {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--tier-icon-bg, rgba(255, 255, 255, 0.08));
 }
 
 .tierHeader {
@@ -264,17 +428,67 @@
 }
 
 .tierTitle {
-  font-size: 1.75rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: var(--text-primary, rgba(255, 255, 255, 0.87));
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
+.tierDataRange {
+  display: inline-block;
+  padding: 0.2rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  background: var(--tier-badge-bg, rgba(255, 255, 255, 0.1));
+  color: var(--tier-badge-color, rgba(255, 255, 255, 0.7));
+  margin-bottom: 0.6rem;
+}
+
 .tierDescription {
-  font-size: 0.9rem;
-  color: #00ed64;
-  font-weight: 500;
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-muted, rgba(239, 237, 253, 0.7));
+  font-weight: 400;
+  margin-top: 0.4rem;
+  line-height: 1.5;
+}
+
+.tierComplexity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.complexityLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted, rgba(239, 237, 253, 0.5));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.complexityDots {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.complexityDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.2s ease;
+}
+
+.complexityDotActive {
+  background: var(--tier-dot-color, #5b6cff);
+  border-color: var(--tier-dot-color, #5b6cff);
+  box-shadow: 0 0 6px var(--tier-dot-color, rgba(91, 108, 255, 0.6));
 }
 
 .tierDetails {
@@ -290,6 +504,32 @@
   font-size: 0.9rem;
   color: var(--text-muted, rgba(239, 237, 253, 0.7));
   text-align: center;
+}
+
+.tierBullets {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text-muted, rgba(239, 237, 253, 0.6));
+  text-align: left;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  padding-top: 0.75rem;
+}
+
+.tierBullets li {
+  margin-bottom: 0.35rem;
+  padding-left: 1.1rem;
+  position: relative;
+}
+
+.tierBullets li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--tier-accent, rgba(255, 255, 255, 0.4));
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .tierDisclaimer {

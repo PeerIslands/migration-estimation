@@ -386,26 +386,26 @@
   to { transform: rotate(360deg); }
 }
 
-/* Script Download Styles */
+/* Script Download Styles - compact step divs */
 .scriptSteps {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 12px;
 }
 
 .scriptStep {
   display: flex;
-  gap: 16px;
-  padding: 20px;
+  gap: 10px;
+  padding: 12px;
   background: rgba(91, 108, 255, 0.05);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(91, 108, 255, 0.1);
 }
 
 .stepNumber {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -413,7 +413,7 @@
   color: white;
   border-radius: 50%;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .stepContent {
@@ -421,27 +421,27 @@
 }
 
 .stepContent h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
+  margin: 0 0 4px 0;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary, #efedfd);
 }
 
 .stepContent p {
-  margin: 4px 0;
-  font-size: 14px;
+  margin: 2px 0;
+  font-size: 13px;
   color: var(--text-muted, rgba(239, 237, 253, 0.7));
-  line-height: 1.5;
+  line-height: 1.45;
 }
 
 .downloadButton {
-  margin-top: 12px;
-  padding: 10px 20px;
+  margin-top: 8px;
+  padding: 8px 14px;
   background: var(--accent-primary, #5b6cff);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -454,19 +454,19 @@
 
 .codeBlock {
   display: block;
-  margin: 12px 0;
-  padding: 12px;
+  margin: 8px 0;
+  padding: 8px 10px;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(91, 108, 255, 0.2);
   border-radius: 6px;
   font-family: 'Monaco', 'Menlo', monospace;
-  font-size: 12px;
+  font-size: 11px;
   color: #a0d8ff;
   overflow-x: auto;
 }
 
 .note {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-muted, rgba(239, 237, 253, 0.5));
   font-style: italic;
 }
